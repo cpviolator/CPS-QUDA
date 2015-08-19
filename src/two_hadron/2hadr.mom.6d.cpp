@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
   int z_idx3d = 0;
 
   int max_mom = NSITES_3D;
-  mom1D zmom(max_mom, SINPz_Pz/(1.0*100));
+  mom3D mom(max_mom, SINPz_Pz/(1.0*100));
   
   //In these arrays, we will use the index convention [sink_index + vol*source_index]
   WilsonMatrix *t3_arr = (WilsonMatrix*)smalloc(vol3d*sizeof(WilsonMatrix));
@@ -234,15 +234,15 @@ int main(int argc, char *argv[]) {
 //n_mom_srcs pants
 	int n_mom_srcs    = 0;
 	
-	for (zmom.P[2] = 0; zmom.P[2] < max_mom; zmom.P[2]++)
-	  for (zmom.P[1] = 0; zmom.P[1] < max_mom; zmom.P[1]++)
-	    for (zmom.P[0] = 0; zmom.P[0] < max_mom; zmom.P[0]++) {
+	for (mom.P[2] = 0; mom.P[2] < max_mom; mom.P[2]++)
+	  for (mom.P[1] = 0; mom.P[1] < max_mom; mom.P[1]++)
+	    for (mom.P[0] = 0; mom.P[0] < max_mom; mom.P[0]++) {
 	      
-	      if((sin(zmom.mod())/(zmom.mod()) > zmom.sin_cutoff) || zmom.index() == 0) {
+	      if((sin(mom.mod())/(mom.mod()) > mom.sin_cutoff) || mom.index() == 0) {
 		
 		//Set momentum array
 		for(int a=0; a<vol3d; a++) {
-		  if(a == zmom.index()) 
+		  if(a == mom.index()) 
 		    FFTW_mom_arr[a][0] = 1.0;
 		  else 
 		    FFTW_mom_arr[a][0] = 0.0;
@@ -277,7 +277,7 @@ int main(int argc, char *argv[]) {
 //this is the slooow part
 		//Get Momentum Propagator	    
 		//QPropWMomSrc qprop_mom(lat, &arg_z, P, &c_arg);
-		QPropWMomSrcSmeared qprop_mom(lat, &arg_z, zmom.P, &g_arg_mom, &c_arg);
+		QPropWMomSrcSmeared qprop_mom(lat, &arg_z, mom.P, &g_arg_mom, &c_arg);
 		cout<<"Inversion "<<(n_mom_srcs+1)<<" complete."<<endl;
 		qprop_mom.GaussSmearSinkProp(g_arg_mom);
 		cout<<"Sink Smear "<<(n_mom_srcs+1)<<" complete."<<endl;
@@ -343,7 +343,7 @@ int main(int argc, char *argv[]) {
 		      //t3_arr[y_idx3d + vol3d*z_idx3d] += temp;
 		    }
 		n_mom_srcs++; 
-		cout << "momentum sources: "<<1+zmom.P[2]*max_mom*max_mom + zmom.P[1]*max_mom + zmom.P[0]<<" / "<<pow(max_mom,3)<<" checked"<<endl;
+		cout << "momentum sources: "<<1+mom.P[2]*max_mom*max_mom + mom.P[1]*max_mom + mom.P[0]<<" / "<<pow(max_mom,3)<<" checked"<<endl;
 	      }
 	    }
 	

@@ -9,8 +9,8 @@
 		CPS_utils.cpp
 		FFTW_functions.h
 		FFTW_functions.cpp
-		mom1D.h
-		mom1D.cpp
+		mom3D.h
+		mom3D.cpp
 		stopwatch.h
 		stopwatch.cpp
 		tr_ABdag.cu

@@ -28,7 +28,7 @@
 
 //local include directory
 #include <CPS_utils.h>
-#include <mom1D.h>
+#include <mom3D.h>
 
 //////////////
 //parameters//

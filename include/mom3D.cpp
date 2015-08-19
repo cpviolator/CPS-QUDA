@@ -1,17 +1,17 @@
 //momenta.cpp
 #include <cmath>
-#include "mom1D.h"
+#include "mom3D.h"
 
-mom1D::mom1D(int max_, double sin_cutoff_):
+mom3D::mom3D(int max_, double sin_cutoff_):
 max(max_), sin_cutoff(sin_cutoff_) {
 	for (int i=0; i<3; i++) P[i] = 0;
 }
 
-int mom1D::index() {
+int mom3D::index() {
 	return P[2]*max*max + P[1]*max + P[0];
 }
 
-double mom1D::mod() {
+double mom3D::mod() {
 	int a, b, c;
 
 	if (P[2] >= max/2) a = max-P[2];

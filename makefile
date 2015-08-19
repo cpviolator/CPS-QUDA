@@ -10,6 +10,7 @@ endif
 all: 
 	$(MAKE) -C include
 	$(MAKE) -C src
+	@echo Make successful.
 
 cps: 
 	cd $(CPS_SRC)

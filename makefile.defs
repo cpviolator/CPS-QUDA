@@ -1,7 +1,7 @@
 #dependencies
-CPSSRC = /home/bernsm3/MOD-cps++_v5_0_26-SCALAR#CPS source code
-CPSGPU = /home/bernsm3/MOD-cps++_v5_0_16-GPU#built GPU version
-CPSCPU = /home/bernsm3/MOD-cps++_v5_0_26-SCALAR#built scalar version
+CPSSRC = /home/bernsm3/QUDA-CPS/QUDA-CPS_v5_0_26#CPS source code
+CPSGPU = /home/bernsm3/QUDA-CPS/QUDA-CPS_v5_0_26#built GPU version
+CPSCPU = /home/bernsm3/QUDA-CPS/QUDA-CPS_v5_0_26#built scalar version
 QUDA = /home/bernsm3/quda-master
 CUDA = /usr/local/cuda
 FFTW = /home/howarth/fftw-3.3.4

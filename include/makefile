@@ -22,8 +22,8 @@ tr_ABdag.o:
 
 stopwatch.o: stopwatch.h stopwatch.cpp ; $(CXX) -c -I. stopwatch.cpp
 
-FFTW_functions.o: FFTW_functions.h FFTW_functions.cpp mom1D.h mom1D.cpp ; $(CXX) -c $(CXXFLAGS_FFTW) FFTW_functions.cpp mom1D.cpp
-#FFTW_functions.o: test_FFT_wtf.cpp mom1D.cpp ; $(CXX) -c $(CXXFLAGS_FFTW) test_FFT_wtf.cpp mom1D.cpp
+FFTW_functions.o: FFTW_functions.h FFTW_functions.cpp mom3D.h mom3D.cpp ; $(CXX) -c $(CXXFLAGS_FFTW) FFTW_functions.cpp mom3D.cpp
+#FFTW_functions.o: test_FFT_wtf.cpp mom3D.cpp ; $(CXX) -c $(CXXFLAGS_FFTW) test_FFT_wtf.cpp mom3D.cpp
 
 CPS_utils_1pion.o: CPS_utils_1pion.h CPS_utils.cpp ; $(CXX) -c $(CXXFLAGS) $(WHICHFLAGS) CPS_utils_1pion.h CPS_utils.cpp
 CPS_utils_sum.o: CPS_utils_sum.h CPS_utils.cpp ; $(CXX) -c $(CXXFLAGS) $(WHICHFLAGS) CPS_utils_sum.h CPS_utils.cpp

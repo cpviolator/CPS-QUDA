@@ -19,7 +19,7 @@ CXXFLAGS += $(CXXFLAGS_CPU) $(CXXFLAGS_FFTW)
 all: $(ALL) ;
 
 exe: obj ; $(foreach nm, $(CPP), $(CXX) -o $(nm:.cpp=.exe) $(nm:.cpp=.o) \
-$(TOPLVL)/include/stopwatch.o $(TOPLVL)/include/FFTW_functions.o $(TOPLVL)/include/mom1D.o\
+$(TOPLVL)/include/stopwatch.o $(TOPLVL)/include/FFTW_functions.o $(TOPLVL)/include/mom3D.o\
  args.o $(CPSCPU)/cps.a $(FFTW)/lib/libfftw3.a;)
 
 obj: $(CPP) ; $(foreach nm, $(CPP) args.cpp, $(CXX) -c $(CXXFLAGS) $(nm);)

@@ -9,7 +9,7 @@
 
 #include <fftw3.h>
 
-#include "mom1D.h"
+#include "mom3D.h"
 
 #define DATAPATH "../data/"
 
@@ -28,9 +28,9 @@ int NMOM, int Lmax, int T, int sweep_counter, int t)
   double SIN_Z_cutoff  = SINPz_Pz/(1.0*100);
   double SIN_XY_cutoff = SINPxy_Pxy/(1.0*100);
 
-  mom1D z(Lmax, SIN_Z_cutoff);
-  mom1D y(Lmax, SIN_XY_cutoff);
-  mom1D x(Lmax, SIN_XY_cutoff);
+  mom3D z(Lmax, SIN_Z_cutoff);
+  mom3D y(Lmax, SIN_XY_cutoff);
+  mom3D x(Lmax, SIN_XY_cutoff);
 
   int mom_arr_idx = 0;
 
@@ -66,7 +66,7 @@ void FFT_wtf_ZX(fftw_complex *FT_6d, int diag, int SINPz_Pz, int SINPxy_Pxy,
  int NMOM, int Lmax, int T, int sweep_counter, int t){
   
   char file[256];
-  sprintf(file, DATA_PATH"D%d_msFT_%d_%d-%d_%d_%d.dat", diag, NMOM, Lmax, T, sweep_counter, t);
+  sprintf(file, DATAPATH"D%d_msFT_%d_%d-%d_%d_%d.dat", diag, NMOM, Lmax, T, sweep_counter, t);
   FILE *fp_6d   = fopen(file, "a");
   
   //Normalised momentum selection: sin(|p|)/|p| > SINP_P/100
@@ -74,8 +74,8 @@ void FFT_wtf_ZX(fftw_complex *FT_6d, int diag, int SINPz_Pz, int SINPxy_Pxy,
   double SIN_Z_cutoff  = SINPz_Pz/(1.0*100);
   double SIN_XY_cutoff = SINPxy_Pxy/(1.0*100);
  
-  mom1D z(Lmax, SIN_Z_cutoff);
-  mom1D x(Lmax, SIN_XY_cutoff);
+  mom3D z(Lmax, SIN_Z_cutoff);
+  mom3D x(Lmax, SIN_XY_cutoff);
  
   int mom_arr_idx = 0;
   
@@ -105,7 +105,7 @@ void FFT_wtf_XY(fftw_complex *FT_6d, int diag, int SINPz_Pz, int SINPxy_Pxy,
 int NMOM, int Lmax, int T, int sweep_counter, int t){
   
   char file[256];
-  sprintf(file, DATA_PATH"D%d_msFT_%d_%d-%d_%d_%d.dat", diag, NMOM, Lmax, T, sweep_counter, t);
+  sprintf(file, DATAPATH"D%d_msFT_%d_%d-%d_%d_%d.dat", diag, NMOM, Lmax, T, sweep_counter, t);
   FILE *fp_6d   = fopen(file, "a");
   
   //Normalised momentum selection: sin(|p|)/|p| > SINP_P/100
@@ -113,8 +113,8 @@ int NMOM, int Lmax, int T, int sweep_counter, int t){
   //double SIN_Z_cutoff  = SINPz_Pz/(1.0*100);
   double SIN_XY_cutoff = SINPxy_Pxy/(1.0*100);
 
-  mom1D y(Lmax, SIN_XY_cutoff);
-  mom1D x(Lmax, SIN_XY_cutoff);
+  mom3D y(Lmax, SIN_XY_cutoff);
+  mom3D x(Lmax, SIN_XY_cutoff);
 
   int mom_arr_idx = 0;
 

@@ -8,9 +8,6 @@ USING_NAMESPACE_CPS
 // over all lattice sites
 // using a point sources at 0 and Z
 
-//#define NDATA 10
-//#define NSKIP 10
-
 int gaugecounter = 1;
 
 int main(int argc, char *argv[]) {
@@ -75,7 +72,7 @@ int main(int argc, char *argv[]) {
   double norm = pow(vol3d, -0.5);
   
   int max_mom = NSITES_3D;
-  mom1D zmom(max_mom, SINPz_Pz/(1.0*100));
+  mom3D mom(max_mom, SINPz_Pz/(1.0*100));
 
   int s1 = 0;
   int c1 = 0;
@@ -233,21 +230,21 @@ int main(int argc, char *argv[]) {
 	//Generate momentum source
 	int n_mom_srcs    = 0;
 
-	for (zmom.P[2] = 0; zmom.P[2] < max_mom; zmom.P[2]++)
-	  for (zmom.P[1] = 0; zmom.P[1] < max_mom; zmom.P[1]++)
-	    for (zmom.P[0] = 0; zmom.P[0] < max_mom; zmom.P[0]++) {
+	for (mom.P[2] = 0; mom.P[2] < max_mom; mom.P[2]++)
+	  for (mom.P[1] = 0; mom.P[1] < max_mom; mom.P[1]++)
+	    for (mom.P[0] = 0; mom.P[0] < max_mom; mom.P[0]++) {
 	      
-	      cout<<"MOM = "<<zmom.P[0]<<" "<<zmom.P[1]<<" "<<zmom.P[2]<<endl;
+	      cout<<"MOM = "<<mom.P[0]<<" "<<mom.P[1]<<" "<<mom.P[2]<<endl;
 	      
-	      cout<<"NORM_MOM_SZE = "<<zmom.mod()/M_PI<<endl;
+	      cout<<"NORM_MOM_SZE = "<<mom.mod()/M_PI<<endl;
 	      //frac = sin(p)/p
-	      Float frac = sin(zmom.mod())/(zmom.mod());
+	      Float frac = sin(mom.mod())/(mom.mod());
 	      cout<<"SIN(Pz)/Pz = "<<frac<<endl;
 	      
-	      if(frac > zmom.sin_cutoff || (zmom.P[0] == 0 && zmom.P[1] == 0 && zmom.P[2] == 0) ){
+	      if(frac > mom.sin_cutoff || (mom.P[0] == 0 && mom.P[1] == 0 && mom.P[2] == 0) ){
 		
 		//Set momentum
-		int P[3] = {zmom.P[0], zmom.P[1], zmom.P[2]};
+		int P[3] = {mom.P[0], mom.P[1], mom.P[2]};
 		
 		// The CPS momentum source function uses an unnormalised
 		// source, so we take the product of both normalisation
@@ -303,7 +300,7 @@ int main(int argc, char *argv[]) {
 			  }
 		    }
 		n_mom_srcs++; 
-		cout << "momentum sources: "<<1+zmom.P[2]*max_mom*max_mom + zmom.P[1]*max_mom + zmom.P[0]<<" / "<<pow(max_mom,3)<<" checked"<<endl;
+		cout << "momentum sources: "<<1+mom.P[2]*max_mom*max_mom + mom.P[1]*max_mom + mom.P[0]<<" / "<<pow(max_mom,3)<<" checked"<<endl;
 	      }
 	    }
 	

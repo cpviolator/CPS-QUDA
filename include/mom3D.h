@@ -1,13 +1,13 @@
-//mom1D.h
+//mom3D.h
 #ifndef __momenta_h_
 #define __momenta_h_
 
 //class Momenta;
 
-class mom1D {
+class mom3D {
 //friend class Momenta;
 public:
-	mom1D(int max, double sin_cutoff_);
+	mom3D(int max, double sin_cutoff_);
 //private:
 	int P[3];
 	int index();
@@ -19,9 +19,9 @@ public:
 //class Momenta {
 //public:
 //	Momenta(int MAX, double sinZcut, double sinYcut, double sinXcut);
-//	mom1D x;
-//	mom1D y;
-//	mom1D z;
+//	mom3D x;
+//	mom3D y;
+//	mom3D z;
 //
 //}
 
