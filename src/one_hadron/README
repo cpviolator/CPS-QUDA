@@ -1,0 +1,52 @@
+This folder contains 8 variants (2x2x2 options) of a CPS simulation of 1 pion on
+a lattice. The options are specified in the filenames.
+
+Naming conventions--
+
+CPU/GPU 
+CPU- run code on CPU as normal. Depends on the scalar version of CPS.
+GPU- run code on GPU. Depends on the GPU version of CPS, QUDA, and CUDA. This is
+much, much faster. If you have multiple GPUs connected, only one can be used
+(specified in a runtime argument, see below).
+
+mom/ps 
+mom- Momentum source.  
+ps- Point source.
+
+QU/UNQ 
+QU- Quenched simulation.  
+UNQ- Unquenched simulation.
+
+Arguments-- 
+
+./1pion.[run location].[source].[quenching].exe [random seed] [GPU index] 
+(ex. ./1pion.CPU.mom.QU.exe 1234; ./1pion.GPU.mom.QU.exe 1234 0)
+
+The seed is used to initialize CPS's RNG. Running an executable with the same
+seed twice will produce identical data. It is an int of typically 4+ digits.
+
+If you have one GPU, it has index 0. Check your GPU placements with:
+$ nvidia-smi
+This code can only run on one GPU at a time.
+
+Usage--
+
+First, set the necessary parameters (Beta, lattice size, etc.) in params.h.
+Then, if this is the first time you are using these parameters in that file,
+comment out READ or set it to != 1. CPS will generate a lattice object at each
+timestep and store it in a .dat file in /latt_configs. Otherwise, set READ to 1
+and the .dat files will be read instead of re-generated (this runs significantly
+faster). The seed does not affect the lattice object, e.g. a file created by
+`./1pion.CPU.mom.QU.exe 1234` can be read by `./1pion.CPU.mom.QU.exe 6666`
+provided the parameters are not changed.
+
+The physics is done on each lattice object just after it is generated/read- for
+details, see the commented source code. The data is written to a .dat file in 
+/data whose name contains the simulation parameters and seed. It can then be 
+manipulated with the code in /src/analysis or your own statistics tools.
+
+Each line of outputted data is of the form
+[step] [t] 0 [C(t)]
+Where C(t) is the correlation function, the sum of Re Tr(M Mdag) over all 
+lattice sites, with M an inverse Wilson fermion matrix. '0' is shorthand
+for 'projected onto the 0 momentum mode'.

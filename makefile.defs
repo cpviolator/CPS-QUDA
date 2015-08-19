@@ -1,0 +1,18 @@
+#dependencies
+CPSSRC = /home/bernsm3/MOD-cps++_v5_0_26-SCALAR#CPS source code
+CPSGPU = /home/bernsm3/MOD-cps++_v5_0_16-GPU#built GPU version
+CPSCPU = /home/bernsm3/MOD-cps++_v5_0_26-SCALAR#built scalar version
+QUDA = /home/bernsm3/quda-master
+CUDA = /usr/local/cuda
+FFTW = /home/howarth/fftw-3.3.4
+
+#compiler
+CXX = g++
+CXXFLAGS = -I. -I$(TOPLVL)/include -Wno-write-strings -std=c++11
+CXXFLAGS_CPU = -I$(CPSCPU) -I$(CPSCPU)/include
+CXXFLAGS_GPU = -I$(CPSGPU) -I$(CPSGPU)/include -I$(QUDA)/include -I$(QUDA) -I$(CUDA)/include
+CXXFLAGS_FFTW = -I$(FFTW) -I$(FFTW)/include
+
+#build options
+BUILD_GPU = no
+BUILD_SCALAR = yes
