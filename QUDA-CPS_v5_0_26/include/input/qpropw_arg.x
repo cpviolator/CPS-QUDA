@@ -26,8 +26,11 @@ enum SourceType {
 enum RandomType {
   GAUSS  = 0, 
   UONE   = 1, 
-  ZTWO   = 2, 
-  NORAND = 3 } ;
+  ZTWO   = 2,
+  /* Begin QUDA_CPS */
+  ZTWOXZTWO = 3,
+  NORAND = 4 } ;
+  /* End QUDA_CPS */
 
 class QPropWArg {
 

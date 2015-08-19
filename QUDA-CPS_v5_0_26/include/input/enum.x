@@ -811,6 +811,9 @@ enum InverterType {
   LOWMODEAPPROX    = 3,  /* Low Mode Approximation */
   CG_LOWMODE_DEFL  = 4,  /* CG accelerated using low-mode deflation */
   HDCG  = 5  /* HDCG */
+  /* Begin QUDA_CPS */
+  QUDA_GCR = 6 /* Use the QUDA_GCR inverter */
+  /* End QUDA_CPS */
 };
 
 /* Which type of approximation to use? */
