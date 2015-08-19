@@ -8,7 +8,7 @@ supported fermion inverters are listed below:
 	  1. Clover Fermions
 	  2. Wilson Fermions*
 
-(*One may set the clover coefficient do_arg.clover_coeff = 0.0 to simulate
+(*One may set the clover coefficient `do_arg.clover_coeff = 0.0` to simulate
 Wilson fermions. A less inelegant solution is forthcoming.)
 
 One may utilise the CG or BICGSTAB QUDA inverter type simply by setting the
@@ -16,9 +16,9 @@ CPS inverter type as required. An new CPS enumerator QUDA_GCR_INVERTER
 has been included to uitise the QUDA GCR inverter.
 
 The functions added to CPS that enable QUDA support are contained in 
-src/util/quda_functions/quda_functions.C and the header file is in 
+`src/util/quda_functions/quda_functions.C` and the header file is in 
 include/util/quda_functions.h. The code changes to CPS are delineated by 
-the compiler flag '#ifdef USEQUDA'
+the compiler flag `#ifdef USEQUDA`
 
 Examples on how to use the GPU enabled library are given in this release
 for both single hadron and two hadron channels. The modifications 
@@ -30,9 +30,53 @@ Configuring and making this package are given below.
 	CONFIGURING AND COMPILATION
 
 To configure this library on scalar, BGQ, or other CPU architecture, 
-please refer to the README file in CPS. For GPU enabled configuration...
+please refer to the README file in CPS. To configure for GPU, run:
+```sh
+$ ./configure CXXFLAGS=" -DUSEQUDA -I/path/to/quda/include -I/path/to/cuda/include" 
+```
+from the `QUDA-CPS_v5_0_26/` directory. You must already have working 
+installations of QUDA and CUDA.
 
-MATT! You're up!
+CPS can be configured for multiple architectures from the same source tree.
+In this case, we recommend keeping the source tree and build trees separate.
+An example build for scalar and GPU follows:
+```sh
+$ mkdir cpscpu cpsgpu 
+$ cd cpscpu 
+$ ../QUDA-CPS_v5_0_26/configure CXXFLAGS="-Wno-write-strings" 
+$ make 
+$ cd ../cpsgpu 
+$ ../QUDA-CPS_v5_0_26/configure CXXFLAGS="-Wno-write-strings 
+-DUSEQUDA -I/path/to/quda/include -I/path/to/cuda/include" 
+$ make 
+```
+(The `-Wno-write-strings` flag is optional, but recommended to silence
+compiler warnings.)
+
+	BUILD INSTRUCTIONS
+
+The CPS library should be built separately from the simulation code that
+composes the rest of this package. To build the rest of the package 
+after building CPS, edit the top-level `makefile.defs` and then run `make`.
+A top-level `make` will fail if CPS is unbuilt or if `makefile.defs` is not
+properly configured. An example `makefile.defs` corresponding to the above
+configuration example is:
+```make
+CPSSRC = /path/to/QUDA-CPS/QUDA-CPS_v5_0_26#CPS source code
+CPSGPU = /path/to/QUDA-CPS/cpsgpu#built GPU version
+CPSCPU = /path/to/QUDA-CPS/cpscpu#built scalar version
+QUDA = /path/to/quda
+CUDA = /path/to/cuda
+FFTW = /path/to/fftw
+
+BUILD_GPU = yes
+BUILD_SCALAR = yes
+```
+
+Dependencies for all (GPU and scalar) simulation code are: QUDA-CPS 5.0.26 ; FFTW 3
+
+Dependencies for GPU simulation code are: QUDA 0.5.0+ ; CUDA 4.1+
+
 
 	EXTRA FEATURES
 
