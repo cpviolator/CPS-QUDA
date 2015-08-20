@@ -101,17 +101,12 @@ int main(int argc, char *argv[]) {
 
   fftw_complex *FT_d2_6d  = (fftw_complex*)smalloc(vol3d*vol3d*sizeof(fftw_complex));
 
-  //use this array several times for 9d D0, D1, D2.
-
-
   //Momentum source array.
   fftw_complex *FFTW_mom_arr  = (fftw_complex*)smalloc(vol3d*sizeof(fftw_complex));
   //Initialise all fftw_complex arrays
-  for (int i=0; i<vol3d*vol3d*vol3d; i++)
+  for (int i=0; i<vol3d*vol3d; i++)
     for(int a=0; a<2; a++){
-      if(i<vol3d*vol3d) {
-	FT_d2_6d[i][a]  = 0.0;
-      }
+      FT_d2_6d[i][a]  = 0.0;
       if(i<vol3d) {
 	FT_t3[i][a]  = 0.0;
 	FT_t2[i][a]  = 0.0;
@@ -120,7 +115,7 @@ int main(int argc, char *argv[]) {
 	FFTW_mom_arr[i][a]  = 0.0;
       }
     }
-
+  
   FFT_F(6, NSITES_3D, FT_d2_6d);
   FFT_B(6, NSITES_3D, FT_d2_6d);
   
@@ -134,10 +129,10 @@ int main(int argc, char *argv[]) {
   WilsonMatrix t3c;
   WilsonMatrix t2;
   WilsonMatrix t2c;
-//what makes it 6d (a ps replaced with ms not at origin)		
+  //what makes it 6d (a ps replaced with ms not at origin)		
   WilsonMatrix mom_src;
-//  WilsonMatrix temp;
-
+  //  WilsonMatrix temp;
+  
   Rcomplex t1t1c_tr;
   Rcomplex t4t4c_tr;
   Rcomplex d2_tr;
@@ -179,7 +174,7 @@ int main(int argc, char *argv[]) {
       // Use this code to specify a gauge configuration.
       #ifdef QUENCH
         sprintf(lattice, LATT_PATH"QU/lat_hb_B%.2f_%d-%d_%d.dat", BETA, NSITES_3D, NSITES_T, sweep_counter);
-      #else
+#else
         sprintf(lattice, LATT_PATH"UNQ/lat_hmc_B%.2f_M%.3f_%d-%d_%d.dat", BETA, MASS, NSITES_3D, NSITES_T, sweep_counter);
       #endif
 #ifdef READ
@@ -206,15 +201,11 @@ int main(int argc, char *argv[]) {
       // The 0-mom source at the origin is calculated outside the time loop.
       int P0[3] = {0,0,0};
       
-      //arg_0.t = 0;
+      arg_0.t = 0;
       QPropWMomSrcSmeared qprop_0(lat, &arg_0, P0, &g_arg_mom, &c_arg);
       qprop_0.GaussSmearSinkProp(g_arg_mom);
-      //cout<<"Sink Smear 0 complete."<<endl;
+      cout<<"Sink Smear 0 complete."<<endl;
       
-      //QPropWGaussSrc qprop_0(lat, &arg_0, &g_arg_p2a, &c_arg);
-      //qprop_0.GaussSmearSinkProp(g_arg_mom);
-      //QPropWPointSrc qprop_0(lat, &arg_0, &c_arg);
-
       //////////////////////////////////
       // Begin loop over time slices. //
       //////////////////////////////////
@@ -274,46 +265,13 @@ int main(int argc, char *argv[]) {
 	    
 		arg_z.t = t;
 		
-//this is the slooow part
 		//Get Momentum Propagator	    
-		//QPropWMomSrc qprop_mom(lat, &arg_z, P, &c_arg);
 		QPropWMomSrcSmeared qprop_mom(lat, &arg_z, mom.P, &g_arg_mom, &c_arg);
 		cout<<"Inversion "<<(n_mom_srcs+1)<<" complete."<<endl;
 		qprop_mom.GaussSmearSinkProp(g_arg_mom);
 		cout<<"Sink Smear "<<(n_mom_srcs+1)<<" complete."<<endl;
 		
-		/*
-		//OMIT THE LOOP OVER Z!!!
-		//Loop over sources at z.
-		z[3] = t;
-		for (z[2]=0; z[2]<GJP.ZnodeSites(); z[2]++)
-		  for (z[1]=0; z[1]<GJP.YnodeSites(); z[1]++)
-		    for (z[0]=0; z[0]<xnodes; z[0]++) {
-		      z_idx4d = lat.GsiteOffset(z)/4;
-		      z_idx3d = z_idx4d - vol3d*z[3];
-		      
-		      //Construct momentum source <P_k|		    		    
-		      int s1, c1, s2, c2, sc_idx;
-		      for(s1=0;s1<4;s1++)
-			for(c1=0;c1<3;c1++)
-			  for(s2=0;s2<4;s2++)
-			    for(c2=0;c2<3;c2++){
-			      sc_idx = 2*(c2 + 3*s2 + 12*c1 + 36*s1);
-			      
-			      //Populate the diagonal, zero out the off-diagonal.
-			      if((sc_idx%26)==0){
-				mom_src(s1,c1,s2,c2).real(FFTW_mom_arr[z_idx3d][0]);
-				mom_src(s1,c1,s2,c2).imag(FFTW_mom_arr[z_idx3d][1]);
-			      }else{
-				mom_src(s1,c1,s2,c2).real(0.0);
-				mom_src(s1,c1,s2,c2).imag(0.0);
-			      }
-			    }
-		      
-		      //Conjugate the Source.
-		      mom_src.hconj();
-		*/    
-		      //Loop over sinks at x.
+		//Loop over sinks at x.
 		x[3] = 0;
 		for (x[2]=0; x[2]<GJP.ZnodeSites(); x[2]++)
 		  for (x[1]=0; x[1]<ynodes; x[1]++)
@@ -323,9 +281,6 @@ int main(int argc, char *argv[]) {
 		      
 		      //Build t2 array.
 		      t2_arr[x_idx3d] = qprop_mom[x_idx4d];
-		      //temp = qprop_mom[x_idx4d];
-		      //temp *= mom_src;
-		      //t2_arr[x_idx3d + vol3d*z_idx3d] += temp;
 		    }
 		
 		//Loop over sinks at y.
@@ -338,9 +293,6 @@ int main(int argc, char *argv[]) {
 		      
 		      //Build t2 array.
 		      t3_arr[y_idx3d] = qprop_mom[y_idx4d];
-		      //temp = qprop_mom[y_idx4d];
-		      //temp *= mom_src;
-		      //t3_arr[y_idx3d + vol3d*z_idx3d] += temp;
 		    }
 		n_mom_srcs++; 
 		cout << "momentum sources: "<<1+mom.P[2]*max_mom*max_mom + mom.P[1]*max_mom + mom.P[0]<<" / "<<pow(max_mom,3)<<" checked"<<endl;
@@ -359,12 +311,12 @@ int main(int argc, char *argv[]) {
 	///////////////////////////////////////////////
 	// Begin summation of trace at time slice t. //
 	///////////////////////////////////////////////
-	      
+	
 	// The t1, t1c, t4, and t4c propagators are calculated 'on the fly'
 	// within the trace summation.
-      
+	
 	//Reinitialise all trace variables
-     //WilsonMatrix
+	//WilsonMatrix
 	t1  *= 0.0;
 	t1c *= 0.0;
 	t2  *= 0.0;
@@ -375,20 +327,16 @@ int main(int argc, char *argv[]) {
 	t4c *= 0.0;
 	t4t1c *= 0.0;
 	t2t3c *= 0.0;
-      //Rcomplex
+	//Rcomplex
 	t1t1c_tr *= 0.0;
 	t2t2c_tr *= 0.0;
 	t3t3c_tr *= 0.0;
 	t4t4c_tr *= 0.0;
 	d2_tr *= 0.0;
             
-	for (int i=0; i<vol3d*vol3d*vol3d; i++) 
+	for (int i=0; i<vol3d*vol3d; i++) 
 	  for(int a=0; a<2; a++) {
-	    //FT_d2_9d[i][a] = 0.0;
-	    if(i<vol3d*vol3d) {
-	      //FT_d2_6d[i][a]  = 0.0;
-	      FT_d2_6d[i][a]  = 0.0;
-	    }
+	    FT_d2_6d[i][a]  = 0.0;	    
 	    if(i<vol3d) {
 	      FT_t3[i][a] = 0.0;
 	      FT_t2[i][a] = 0.0;
@@ -396,8 +344,7 @@ int main(int argc, char *argv[]) {
 	      FT_t4[i][a] = 0.0;
 	    }
 	  }
-      
-      
+	
 	//Sum over X
 	x[3] = 0;
 	for (x[2]=0; x[2]<znodes; x[2]++)
@@ -409,10 +356,6 @@ int main(int argc, char *argv[]) {
 	      t1 = qprop_0[x_idx4d];
 	      t1c = t1.conj_cp();
 	      
-	      //Perform t1t1c trace sum for D1 graph.
-	      //FT_t1[x_idx3d][0] = MMDag_re_tr(t1);
-	      //FT_t1[x_idx3d][1] = 0.0;
-	    
 	      //Sum over Y
 	      y[3] = t;
 	      for (y[2]=0; y[2]<znodes; y[2]++)
@@ -430,8 +373,6 @@ int main(int argc, char *argv[]) {
 		      FT_t4[y_idx3d][0] = MMDag_re_tr(t4);
 		      FT_t4[y_idx3d][1] = 0.0;
 		    }
-		  
-		    //EDIT
 		    
 		    //Declare new Wilson Matrix t4*t1c for D2 and compute
 		    t4t1c = t4;
@@ -470,12 +411,8 @@ int main(int argc, char *argv[]) {
 		      FT_t3[y_idx3d][0] = MMDag_re_tr(t3_arr[y_idx3d]);
 		      FT_t3[y_idx3d][1] = 0.0;
 		    }
-		    //EDIT
-		    
 		  }
 	    }
-	
-	
 	
 	//Fill the trace arrays
 	time[2] = stopwatchReadSeconds();
@@ -484,7 +421,6 @@ int main(int argc, char *argv[]) {
 	// Write traces to file for post-processing. //
 	///////////////////////////////////////////////
       
-	//EDIT
 	FFT_F(3, NSITES_3D, FT_t2);
 	FFT_F(3, NSITES_3D, FT_t3);
 	FFT_F(3, NSITES_3D, FT_t4);
@@ -493,13 +429,13 @@ int main(int argc, char *argv[]) {
 	for (int r=0; r<allFTs.size(); r++) {
 	  if (r==0 && t!=0) continue; //only print FT_t1 once
 	  sprintf(file, DATAPATH"3-0.1_msmsFT_6d_%s_%s_%d_%d-%d_%d_%d.dat", is_qu.c_str(),
-	  allFTnames[r].c_str(), n_mom_srcs, NSITES_3D, NSITES_T, sweep_counter, t);
+		  allFTnames[r].c_str(), n_mom_srcs, NSITES_3D, NSITES_T, sweep_counter, t);
 	  FILE* f   = Fopen(file, "a");
 	  for(int sink =0; sink<vol3d; sink++)
 	    Fprintf(f,  "%d %d %d %.16e %.16e\n", sweep_counter, t, sink, allFTs[r][sink][0], allFTs[r][sink][1]);
 	  Fclose(f);
 	}
-
+	
 	//////////////////////////
 	// FFT the 6D D2 array. //
 	//////////////////////////

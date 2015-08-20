@@ -93,7 +93,6 @@ int main(int argc, char *argv[]) {
   }
 
   //Arrays to store the trace data
-  //fftw_complex *FT_t1  = (fftw_complex*)smalloc(vol3d*sizeof(fftw_complex));
   fftw_complex *FT_t4 = (fftw_complex*)smalloc(vol3d*sizeof(fftw_complex));
   fftw_complex *FT_t2 = (fftw_complex*)smalloc(vol3d*vol3d*sizeof(fftw_complex));
   fftw_complex *FT_t3 = (fftw_complex*)smalloc(vol3d*vol3d*sizeof(fftw_complex));
@@ -112,7 +111,6 @@ int main(int argc, char *argv[]) {
 	FT_t2[i][a]  = 0.0;
       }
       if(i<vol3d) {
-	//FT_t1[i][a]  = 0.0;
 	FT_t4[i][a]  = 0.0;
 	FFTW_mom_arr[i][a]  = 0.0;
       }
@@ -195,7 +193,7 @@ int main(int argc, char *argv[]) {
       // One array is of t2 S(x,z)
       // One array is of t3 S(y,z)
       // Each array will be indexed arr[sink_index + vol*source_index].
-
+      
       // The sources for these arrays are calculated using the backaward FT of momentum states.
       // E.G., momemtum state P_0=(0,0,0) is used to calculated the position space state
       // X_0[n] = \frac{1}{sqrt(V)} * \sum_{m} e^{(-2i*pi/N)*n*m} * P_0[m].
@@ -208,11 +206,10 @@ int main(int argc, char *argv[]) {
       // The 0-mom source at the origin is calculated outside the time loop.
       int P0[3] = {0,0,0};
       
-      //arg_0.t = 0;
-      // QPropWMomSrc qprop_0(lat, &arg_0, P0, &c_arg);
+      arg_0.t = 0;
       QPropWMomSrcSmeared qprop_0(lat, &arg_0, P0, &g_arg_mom, &c_arg);
       qprop_0.GaussSmearSinkProp(g_arg_mom);
-      //cout<<"Sink Smear 0 complete."<<endl;
+      cout<<"Sink Smear 0 complete."<<endl;
       
       //////////////////////////////////
       // Begin loop over time slices. //
@@ -283,7 +280,6 @@ int main(int argc, char *argv[]) {
 			    
 			    //Build t2 array.
 			    t2_arr[x_idx3d + vol3d*z_idx3d] += qprop_mom[x_idx4d]*conj(qprop_mom.mom_src(z_idx4d));
-			    //t2_arr[x_idx3d + vol3d*z_idx3d] += qprop_mom[x_idx4d];
 			  }
 		      
 		      //Loop over sinks at y.
@@ -296,7 +292,6 @@ int main(int argc, char *argv[]) {
 			    
 			    //Build t3 array.
 			    t3_arr[y_idx3d + vol3d*z_idx3d] += qprop_mom[y_idx4d]*conj(qprop_mom.mom_src(z_idx4d));
-			    //t3_arr[y_idx3d + vol3d*z_idx3d] += qprop_mom[y_idx4d];
 			  }
 		    }
 		n_mom_srcs++; 
@@ -322,7 +317,7 @@ int main(int argc, char *argv[]) {
 	// within the trace summation.
       
 	//Reinitialise all trace variables
-      
+	
 	t1  *= 0.0;
 	t1c *= 0.0;
 	t2  *= 0.0;
@@ -348,11 +343,9 @@ int main(int argc, char *argv[]) {
 	      FT_t2[i][a] = 0.0;
 	    }
 	    if(i<vol3d) {
-	      //FT_t1[i][a] = 0.0;
 	      FT_t4[i][a] = 0.0;
 	    }
 	  }
-	cout<<"FLAG 2"<<endl;
 	//Sum over X
 	x[3] = 0;
 	for (x[2]=0; x[2]<znodes; x[2]++)
@@ -371,7 +364,7 @@ int main(int argc, char *argv[]) {
 		  for (y[0]=0; y[0]<xnodes; y[0]++) {
 		    y_idx4d = lat.GsiteOffset(y)/4;
 		    y_idx3d = y_idx4d - vol3d*y[3];
-		  
+		    
 		    t4 = qprop_0[y_idx4d];
 		  
 		    // Use this condition so that t4t4c is calculated only once

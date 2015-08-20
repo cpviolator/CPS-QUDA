@@ -72,12 +72,12 @@ int main(int argc, char *argv[]) {
   int x[4];
   int y[4];
   int z[4];
-  int x_idx_3d = 0;
-  int x_idx_4d = 0;
-  int y_idx_3d = 0;
-  int y_idx_4d = 0;
-  int z_idx_3d = 0;
-  int z_idx_4d = 0;
+  int x_idx3d = 0;
+  int x_idx4d = 0;
+  int y_idx3d = 0;
+  int y_idx4d = 0;
+  int z_idx3d = 0;
+  int z_idx4d = 0;
   int z_arr_idx = 0;
 
   //Dilution variables.
@@ -161,7 +161,6 @@ int main(int argc, char *argv[]) {
       // The point source is calculated outside the time loop.
       QPropWGaussSrc qprop_point(lat, &arg_ps, &g_arg, &c_arg);
       qprop_point.GaussSmearSinkProp(g_arg);
-      //QPropWPointSrc qprop_point(lat, &arg_P, &c_arg);
       
       //////////////////////////////////
       // Begin loop over time slices. //
@@ -178,11 +177,10 @@ int main(int argc, char *argv[]) {
 	// Compute t2A and t3A //
 	/////////////////////////
 	time[1] = stopwatchReadSeconds();
-
+	
 	for(int j=0; j<NRAND; j++) {
 //THIS IS ARGV[2]
 	  arg_sto.t = t;	  
-	  //QPropWRandWallSrc qprop_stoch(lat, &arg_Sto, &r_arg, &c_arg);
 	  for (index=0;index<subvol;index++) {
 	    QPropWRandWallSrcDilutedSmeared qprop_stoch(lat, &arg_sto, &r_arg, &c_arg, &g_arg, L, index);
 	    qprop_stoch.GaussSmearSinkProp(g_arg);
@@ -192,21 +190,21 @@ int main(int argc, char *argv[]) {
 	    for (z[2]=0; z[2]<znodes; z[2]++)
 	      for (z[1]=0; z[1]<ynodes; z[1]++)
 		for (z[0]=0; z[0]<xnodes; z[0]++) {
-		  z_idx_4d = lat.GsiteOffset(z)/4;
-		  z_idx_3d = z_idx_4d - vol3d*z[3];
-		  z_arr_idx = vol3d*z_idx_3d + vol3d*vol3d*(((j+1)/(NRAND))-1);
+		  z_idx4d = lat.GsiteOffset(z)/4;
+		  z_idx3d = z_idx4d - vol3d*z[3];
+		  z_arr_idx = vol3d*z_idx3d + vol3d*vol3d*(((j+1)/(NRAND))-1);
 		  
 		  //Loop over sinks at x.
 		  x[3] = 0;
 		  for (x[2]=0; x[2]<znodes; x[2]++)
 		    for (x[1]=0; x[1]<ynodes; x[1]++)
 		      for (x[0]=0; x[0]<xnodes; x[0]++) {
-			x_idx_4d = lat.GsiteOffset(x)/4;
-			x_idx_3d = x_idx_4d - vol3d*x[3];
+			x_idx4d = lat.GsiteOffset(x)/4;
+			x_idx3d = x_idx4d - vol3d*x[3];
 			
-			t2A_full_arr[y_idx_3d + z_arr_idx] += qprop_stoch[x_idx_4d]*conj(qprop_stoch.rand_src(z_idx_4d));
+			t2A_full_arr[x_idx3d + z_arr_idx] += qprop_stoch[x_idx4d]*conj(qprop_stoch.rand_src(z_idx4d));
 			if((j+1)%(NRAND)==0) {
-			  t2A_full_arr[y_idx_3d + z_arr_idx] *= 1.0/((j+1));
+			  t2A_full_arr[x_idx3d + z_arr_idx] *= 1.0/((j+1));
 			}
 		      }
 		  
@@ -215,12 +213,12 @@ int main(int argc, char *argv[]) {
 		  for (y[2]=0; y[2]<znodes; y[2]++)
 		    for (y[1]=0; y[1]<ynodes; y[1]++)
 		      for (y[0]=0; y[0]<xnodes; y[0]++) {
-			y_idx_4d = lat.GsiteOffset(y)/4;
-			y_idx_3d = y_idx_4d - vol3d*y[3];
+			y_idx4d = lat.GsiteOffset(y)/4;
+			y_idx3d = y_idx4d - vol3d*y[3];
 			
-			t3A_full_arr[y_idx_3d + z_arr_idx] += qprop_stoch[y_idx_4d]*conj(qprop_stoch.rand_src(z_idx_4d));
+			t3A_full_arr[y_idx3d + z_arr_idx] += qprop_stoch[y_idx4d]*conj(qprop_stoch.rand_src(z_idx4d));
 			if((j+1)%(NRAND)==0) {
-			  t3A_full_arr[y_idx_3d + z_arr_idx] *= 1.0/((j+1));
+			  t3A_full_arr[y_idx3d + z_arr_idx] *= 1.0/((j+1));
 			}
 		      }
 		}
@@ -234,7 +232,6 @@ int main(int argc, char *argv[]) {
 	for(int j=0; j<NRAND; j++) {
 //THIS TOO IS ARGV[2]
 	  arg_sto.t = t;
-	  //QPropWRandWallSrc qprop_stoch(lat, &arg_Sto, &r_arg, &c_arg);
 	  for (index=0;index<subvol;index++) {
 	    QPropWRandWallSrcDilutedSmeared qprop_stoch(lat, &arg_sto, &r_arg, &c_arg, &g_arg, L, index);
 	    qprop_stoch.GaussSmearSinkProp(g_arg);	  
@@ -246,20 +243,20 @@ int main(int argc, char *argv[]) {
 	    for (z[2]=0; z[2]<znodes; z[2]++)
 	      for (z[1]=0; z[1]<ynodes; z[1]++)
 		for (z[0]=0; z[0]<xnodes; z[0]++) {
-		  z_idx_4d = lat.GsiteOffset(z)/4;
-		  z_idx_3d = z_idx_4d - vol3d*z[3];
-		  z_arr_idx = vol3d*z_idx_3d + vol3d*vol3d*(((j+1)/(NRAND))-1); 
+		  z_idx4d = lat.GsiteOffset(z)/4;
+		  z_idx3d = z_idx4d - vol3d*z[3];
+		  z_arr_idx = vol3d*z_idx3d + vol3d*vol3d*(((j+1)/(NRAND))-1); 
 		  //Loop over sinks at x.
 		  x[3] = 0;
 		  for (x[2]=0; x[2]<znodes; x[2]++)
 		    for (x[1]=0; x[1]<ynodes; x[1]++)
 		      for (x[0]=0; x[0]<xnodes; x[0]++) {
-			x_idx_4d = lat.GsiteOffset(x)/4;
-			x_idx_3d = x_idx_4d - vol3d*x[3];
+			x_idx4d = lat.GsiteOffset(x)/4;
+			x_idx3d = x_idx4d - vol3d*x[3];
 			
-			t2B_full_arr[y_idx_3d + z_arr_idx] += qprop_stoch[x_idx_4d]*conj(qprop_stoch.rand_src(z_idx_4d));
+			t2B_full_arr[x_idx3d + z_arr_idx] += qprop_stoch[x_idx4d]*conj(qprop_stoch.rand_src(z_idx4d));
 			if((j+1)%(NRAND)==0) {
-			  t2B_full_arr[x_idx_3d + z_arr_idx] *= 1.0/((j+1));
+			  t2B_full_arr[x_idx3d + z_arr_idx] *= 1.0/((j+1));
 			}
 		      }
 		  
@@ -269,12 +266,12 @@ int main(int argc, char *argv[]) {
 		  for (y[2]=0; y[2]<znodes; y[2]++)
 		    for (y[1]=0; y[1]<ynodes; y[1]++)
 		      for (y[0]=0; y[0]<xnodes; y[0]++) {
-			y_idx_4d = lat.GsiteOffset(y)/4;
-			y_idx_3d = y_idx_4d - vol3d*y[3];
+			y_idx4d = lat.GsiteOffset(y)/4;
+			y_idx3d = y_idx4d - vol3d*y[3];
 			
-			t3B_full_arr[y_idx_3d + z_arr_idx] += qprop_stoch[y_idx_4d]*conj(qprop_stoch.rand_src(z_idx_4d));
+			t3B_full_arr[y_idx3d + z_arr_idx] += qprop_stoch[y_idx4d]*conj(qprop_stoch.rand_src(z_idx4d));
 			if((j+1)%(NRAND)==0) {
-			  t3B_full_arr[y_idx_3d + z_arr_idx] *= 1.0/((j+1));
+			  t3B_full_arr[y_idx3d + z_arr_idx] *= 1.0/((j+1));
 			}
 		      }
 		}
@@ -299,10 +296,10 @@ int main(int argc, char *argv[]) {
 	for (x[2]=0; x[2]<znodes; x[2]++)
 	  for (x[1]=0; x[1]<ynodes; x[1]++)
 	    for (x[0]=0; x[0]<xnodes; x[0]++) {
-	      x_idx_4d = lat.GsiteOffset(x)/4;
-	      x_idx_3d = x_idx_4d - vol3d*x[3];
+	      x_idx4d = lat.GsiteOffset(x)/4;
+	      x_idx3d = x_idx4d - vol3d*x[3];
 	      
-	      t1 = qprop_point[x_idx_4d];
+	      t1 = qprop_point[x_idx4d];
 	      t1c = t1.conj_cp();
 	      
 	      //Perform t1t1c trace sum for D1 graph.
@@ -314,15 +311,15 @@ int main(int argc, char *argv[]) {
 	      for (y[2]=0; y[2]<znodes; y[2]++)
 		for (y[1]=0; y[1]<ynodes; y[1]++)
 		  for (y[0]=0; y[0]<xnodes; y[0]++) {
-		    y_idx_4d = lat.GsiteOffset(y)/4;
-		    y_idx_3d = y_idx_4d - vol3d*y[3];
+		    y_idx4d = lat.GsiteOffset(y)/4;
+		    y_idx3d = y_idx4d - vol3d*y[3];
 		    
-		    t4 = qprop_point[y_idx_4d];
+		    t4 = qprop_point[y_idx4d];
 		    t4c = t4.conj_cp();
 		    
 		    // Use this condition so that t4t4c is calculated only once
 		    // over y per time slice.
-		    if (x_idx_3d == 0) {
+		    if (x_idx3d == 0) {
 		      //Perform t4t4c trace sum.
 		      tr = Trace(t4, t4c);
 		      t4t4c_re_tr += tr.real();
@@ -341,25 +338,25 @@ int main(int argc, char *argv[]) {
 		    for (z[2]=0; z[2]<znodes; z[2]++)
 		      for (z[1]=0; z[1]<ynodes; z[1]++)
 			for (z[0]=0; z[0]<xnodes; z[0]++) {
-			  z_idx_4d = lat.GsiteOffset(z)/4;
-			  z_idx_3d = z_idx_4d - vol3d*z[3];
+			  z_idx4d = lat.GsiteOffset(z)/4;
+			  z_idx3d = z_idx4d - vol3d*z[3];
 			  
-			    /*
+			  /*
 			    ///////////////////////
 			    //ONE SOURCE SECTION //
 			    ///////////////////////
 			    
 			    //Perform t4t1c * t2t3c trace sum.		  
-			    t2t3c = t2A_full_arr[x_idx_3d + vol3d*z_idx_3d + a*vol3d*vol3d];
-			    t3c   = t3A_full_arr[y_idx_3d + vol3d*z_idx_3d + a*vol3d*vol3d].conj_cp();
+			    t2t3c = t2A_full_arr[x_idx3d + vol3d*z_idx3d + a*vol3d*vol3d];
+			    t3c   = t3A_full_arr[y_idx3d + vol3d*z_idx3d + a*vol3d*vol3d].conj_cp();
 			    t2t3c *= t3c;
 			    
 			    tr = Trace(t4t1c, t2t3c);
 			    d2_1_re_tr[a] += tr.real();
 			    
 			    //Perform t1ct4c * t3t2c trace sum.
-			    t3t2c = t3A_full_arr[y_idx_3d + vol3d*z_idx_3d + a*vol3d*vol3d];
-			    t2c   = t2A_full_arr[x_idx_3d + vol3d*z_idx_3d + a*vol3d*vol3d].conj_cp();;
+			    t3t2c = t3A_full_arr[y_idx3d + vol3d*z_idx3d + a*vol3d*vol3d];
+			    t2c   = t2A_full_arr[x_idx3d + vol3d*z_idx3d + a*vol3d*vol3d].conj_cp();;
 			    t3t2c *= t2c;
 			    
 			    tr = Trace(t1t4c, t3t2c);
@@ -367,9 +364,9 @@ int main(int argc, char *argv[]) {
 			    
 			    // Use this condition so that t2t2c is calculated only over
 			    // x and z loops per time slice. 
-			    if (y_idx_3d == 0) {
-			      t2  = t2A_full_arr[x_idx_3d + vol3d*z_idx_3d + a*vol3d*vol3d];
-			      t2c = t2A_full_arr[x_idx_3d + vol3d*z_idx_3d + a*vol3d*vol3d].conj_cp();
+			    if (y_idx3d == 0) {
+			      t2  = t2A_full_arr[x_idx3d + vol3d*z_idx3d + a*vol3d*vol3d];
+			      t2c = t2A_full_arr[x_idx3d + vol3d*z_idx3d + a*vol3d*vol3d].conj_cp();
 			      
 			      tr = Trace(t2, t2c);
 			      t2t2c_1_re_tr[a] += tr.real();
@@ -377,9 +374,9 @@ int main(int argc, char *argv[]) {
 			    
 			    // Use this condition so that t3t3c is calculated only over
 			    // y and z loops per time slice. 
-			    if (x_idx_3d == 0) {
-			      t3  = t3A_full_arr[y_idx_3d + vol3d*z_idx_3d + a*vol3d*vol3d];
-			      t3c = t3A_full_arr[y_idx_3d + vol3d*z_idx_3d + a*vol3d*vol3d].conj_cp();
+			    if (x_idx3d == 0) {
+			      t3  = t3A_full_arr[y_idx3d + vol3d*z_idx3d + a*vol3d*vol3d];
+			      t3c = t3A_full_arr[y_idx3d + vol3d*z_idx3d + a*vol3d*vol3d].conj_cp();
 			      
 			      tr = Trace(t3, t3c);
 			      t3t3c_1_re_tr[a] += tr.real();
@@ -389,17 +386,17 @@ int main(int argc, char *argv[]) {
 			    //TWO SOURCE SECTION //
 			    ///////////////////////
 			    
-			    //Perform t4t1c * t2t3c trace sum.		  
-			    t2t3c = t2A_full_arr[x_idx_3d + vol3d*z_idx_3d + vol3d*vol3d];
-			    t3c   = t3B_full_arr[y_idx_3d + vol3d*z_idx_3d + vol3d*vol3d].conj_cp();
+			    //Perform t4t1c * t2t3c trace sum for D2
+			    t2t3c = t2A_full_arr[x_idx3d + vol3d*z_idx3d + vol3d*vol3d];
+			    t3c   = t3B_full_arr[y_idx3d + vol3d*z_idx3d + vol3d*vol3d].conj_cp();
 			    t2t3c *= t3c;
 			    
 			    tr = Trace(t4t1c, t2t3c);
 			    d2_2_re_tr += tr.real();
 			    
-			    //Perform t1ct4c * t3t2c trace sum.
-			    //t3t2c = t3A_full_arr[y_idx_3d + vol3d*z_idx_3d + vol3d*vol3d];
-			    //t2c   = t2B_full_arr[x_idx_3d + vol3d*z_idx_3d + vol3d*vol3d].conj_cp();;
+			    //Perform t1t4c * t3t2c trace sum for D3
+			    //t3t2c = t3A_full_arr[y_idx3d + vol3d*z_idx3d + vol3d*vol3d];
+			    //t2c   = t2B_full_arr[x_idx3d + vol3d*z_idx3d + vol3d*vol3d].conj_cp();;
 			    //t3t2c *= t2c;
 			    
 			    //tr = Trace(t1t4c, t3t2c);
@@ -407,9 +404,9 @@ int main(int argc, char *argv[]) {
 			    
 			    // Use this condition so that t2t2c is calculated only over
 			    // x and z loops per time slice. 
-			    if (y_idx_3d == 0) {
-			      t2  = t2A_full_arr[x_idx_3d + vol3d*z_idx_3d + vol3d*vol3d];
-			      t2c = t2B_full_arr[x_idx_3d + vol3d*z_idx_3d + vol3d*vol3d].conj_cp();
+			    if (y_idx3d == 0) {
+			      t2  = t2A_full_arr[x_idx3d + vol3d*z_idx3d + vol3d*vol3d];
+			      t2c = t2B_full_arr[x_idx3d + vol3d*z_idx3d + vol3d*vol3d].conj_cp();
 			      
 			      tr = Trace(t2, t2c);
 			      t2t2c_2_re_tr += tr.real();
@@ -417,9 +414,9 @@ int main(int argc, char *argv[]) {
 			    
 			    // Use this condition so that t3t3c is calculated only over
 			    // y and z loops per time slice. 
-			    if (x_idx_3d == 0) {
-			      t3  = t3A_full_arr[y_idx_3d + vol3d*z_idx_3d + vol3d*vol3d];
-			      t3c = t3B_full_arr[y_idx_3d + vol3d*z_idx_3d + vol3d*vol3d].conj_cp();
+			    if (x_idx3d == 0) {
+			      t3  = t3A_full_arr[y_idx3d + vol3d*z_idx3d + vol3d*vol3d];
+			      t3c = t3B_full_arr[y_idx3d + vol3d*z_idx3d + vol3d*vol3d].conj_cp();
 			      
 			      //Perform t3*t3c trace sum for D1 graph.
 			      tr = Trace(t3, t3c);
@@ -430,7 +427,7 @@ int main(int argc, char *argv[]) {
 	    }
 
 	time[3] = stopwatchReadSeconds();
-
+	
 	///////////////////////////
 	// Write traces to file. //
 	///////////////////////////
