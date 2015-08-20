@@ -21,7 +21,7 @@ void WriteLatticeParallel::write(Lattice & lat, const QioArg & wt_arg)
   struct timeval start,end;
   gettimeofday(&start,NULL);
 #endif
-  //sync();
+   sync();
 
   // init
   int error = 0;
@@ -72,7 +72,7 @@ void WriteLatticeParallel::write(Lattice & lat, const QioArg & wt_arg)
   }
   Float temp=0.;
   glb_sum(&temp);
-  //sync();
+  sync();
   if(parIO()) {
     // all open file, start writing
     output.open(wt_arg.FileName);
@@ -164,7 +164,7 @@ void WriteLatticeParallel::write(Lattice & lat, const QioArg & wt_arg)
 
   log();
   finishLogging();
-  //sync();
+  sync();
   VRB.FuncEnd(cname,fname);
 }
 

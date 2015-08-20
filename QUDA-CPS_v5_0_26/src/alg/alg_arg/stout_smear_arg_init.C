@@ -1,3 +1,4 @@
+/* Begin QUDA_CPS */
 #include "alg/stout_smear_arg.h"
 CPS_START_NAMESPACE
 StoutSmearArg::StoutSmearArg():
@@ -6,3 +7,4 @@ StoutSmearArg::StoutSmearArg():
   coef     (0)
 {;}
 CPS_END_NAMESPACE
+/* End QUDA_CPS */

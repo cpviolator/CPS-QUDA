@@ -1,3 +1,4 @@
+/* Begin QUDA_CPS */
 /*! Input paramters for AlgStoutSmear */
 class StoutSmearArg
 {     
@@ -12,3 +13,4 @@ class StoutSmearArg
   
   memfun StoutSmearArg();
 };
+/* End QUDA_CPS */

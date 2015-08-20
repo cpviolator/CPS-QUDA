@@ -23,9 +23,9 @@ the compiler flag '#ifdef USEQUDA'
 Examples on how to use the GPU enabled library are given in this release
 for both single hadron and two hadron channels. The modifications 
 required to allow existing code to use this library should be minimal.
-For details, lease refer to the differences between GPU enabled and CPU 
+For details, please refer to the differences between GPU enabled and CPU 
 only files, highlighted in our production code package. Instructions for 
-Configuring and making this package are given below.
+configuring and making this package are given below.
 
 	CONFIGURING AND COMPILATION
 

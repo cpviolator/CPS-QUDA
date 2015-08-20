@@ -1,6 +1,6 @@
-
-#ifndef _INTERFACE_H_
-#define _INTERFACE_H_
+//Begin QUDA_CPS
+#ifndef _QUDA_INTERFACE_H_
+#define _QUDA_INTERFACE_H_
 
 USING_NAMESPACE_CPS
 
@@ -17,3 +17,4 @@ void set_quda_params(CgArg *cg_arg);
 
 #endif
 
+//End QUDA_CPS

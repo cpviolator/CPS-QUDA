@@ -371,7 +371,7 @@ Lattice::~Lattice()
   // No data manipulations if the scaling factor is 1.0
   // [built into lat.MltFloat].
   MltFloat(1.0 / GJP.XiBare(), GJP.XiDir());
-  //sync();
+//  sync();
 #endif
 
 }
@@ -1486,7 +1486,7 @@ Float Lattice::ReTrPlaq(int *x, int mu, int nu) const
 Float Lattice::SumReTrPlaqNode(void) const
 {
   const char *fname = "SumReTrPlaqNode() const";
-  //sync();
+  sync();
   VRB.Func(cname,fname);
   
   Float sum = 0.0;
@@ -1515,7 +1515,7 @@ Float Lattice::SumReTrPlaqNode(void) const
 Float Lattice::SumReU1PlaqNode() const
 {
   char *fname = "SumReU1PlaqNode() const";
-  //sync();
+  sync();
   VRB.Func(cname,fname);
 
   Float sum = 0.0;
@@ -1536,7 +1536,7 @@ Float Lattice::SumReU1PlaqNode() const
       }
     }
   }
-  //sync();
+  sync();
   VRB.FuncEnd(cname,fname);
   return sum;
 }

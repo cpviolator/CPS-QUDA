@@ -1,3 +1,4 @@
+//Begin QUDA_CPS
 #ifdef USEQUDA
 #include <util/lattice.h>
 #include <util/dirac_op.h>
@@ -360,6 +361,5 @@ void set_quda_params(CgArg *cg_arg)
   // QUDA_LEX_PACKED_CLOVER_ORDER: lexicographical order, packed 
   inv_param.clover_order = QUDA_PACKED_CLOVER_ORDER;
 }
-
 #endif
-
+//End QUDA_CPS
