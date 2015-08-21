@@ -109,7 +109,7 @@ in this package:
 
       The `QPropWMom` class now inherits directly from `QPropW`. It includes
       a new member function `mom_src[src_phase]` that is analogous to the 
-      the `QPropWRand` member function `rand_src[src_value]'. This new member function 
+      the `QPropWRand` member function `rand_src[src_value]`. This new member function 
       is necessary for the calculation of momentum shell sources. The
       structure of the new `QPropWMom` and derived classes is the same as
       the new `QPropWRandWall` classes in that one may employ dilution, 
