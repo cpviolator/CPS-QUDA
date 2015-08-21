@@ -11,14 +11,16 @@ supported fermion inverters are listed below:
 (*One may set the clover coefficient `do_arg.clover_coeff = 0.0` to simulate
 Wilson fermions. A less inelegant solution is forthcoming.)
 
+All files and functions needed to enable QUDA support are contained in the
+directory 'src/util/quda_interface' and the header file 
+'include/util/quda_interface.h'. The only other file which has been
+modified with repsect to QUDA support is
+'src/util/lattice/f_clover/f_clover.C'. The code changes to CPS in this file
+are delineated by the compiler flag `#ifdef USEQUDA`
+
 One may utilise the CG or BICGSTAB QUDA inverter type simply by setting the
 CPS inverter type as required. An new CPS enumerator QUDA_GCR_INVERTER 
 has been included to uitise the QUDA GCR inverter.
-
-The functions added to CPS that enable QUDA support are contained in 
-`src/util/quda_functions/quda_functions.C` and the header file is in 
-include/util/quda_functions.h. The code changes to CPS are delineated by 
-the compiler flag `#ifdef USEQUDA`
 
 Examples on how to use the GPU enabled library are given in this release
 for both single hadron and two hadron channels. The modifications 
@@ -26,6 +28,7 @@ required to allow existing code to use this library should be minimal.
 For details, please refer to the differences between GPU enabled and CPU 
 only files, highlighted in our production code package. Instructions for 
 configuring and making this package are given below.
+
 
 	CONFIGURING AND COMPILATION
 
