@@ -1,4 +1,4 @@
-Welcome to the QUDA enabled Columbia Physics System
+Welcome to the QUDA enabled Columbia Physics System!
 
 	GPU SUPPORT
 
@@ -12,15 +12,15 @@ supported fermion inverters are listed below:
 Wilson fermions. A less inelegant solution is forthcoming.)
 
 All files and functions needed to enable QUDA support are contained in the
-directory 'src/util/quda_interface' and the header file 
-'include/util/quda_interface.h'. The only other file which has been
+directory `src/util/quda_interface` and the header file 
+`include/util/quda_interface.h`. The only other file which has been
 modified with repsect to QUDA support is
-'src/util/lattice/f_clover/f_clover.C'. The code changes to CPS in this file
+`src/util/lattice/f_clover/f_clover.C`. The code changes to CPS in this file
 are delineated by the compiler flag `#ifdef USEQUDA`
 
-One may utilise the CG or BICGSTAB QUDA inverter type simply by setting the
-CPS inverter type as required. An new CPS enumerator QUDA_GCR_INVERTER 
-has been included to uitise the QUDA GCR inverter.
+One may utilise the `CG` or `BICGSTAB` QUDA inverter type simply by setting the
+CPS inverter type as required. A new CPS enumerator `QUDA_GCR_INVERTER` 
+has been included to utilise the QUDA `GCR` inverter.
 
 Examples on how to use the GPU enabled library are given in this release
 for both single hadron and two hadron channels. The modifications 
@@ -32,8 +32,8 @@ configuring and making this package are given below.
 
 	CONFIGURING AND COMPILATION
 
-To configure this library on scalar, BGQ, or other CPU architecture, 
-please refer to the README file in CPS. To configure for GPU, run:
+To configure this library on scalar, BG/Q, or other CPU architecture, 
+please refer to the `README` file in CPS. To configure for GPU, run:
 ```sh
 $ ./configure CXXFLAGS=" -DUSEQUDA -I/path/to/quda/include -I/path/to/cuda/include" 
 ```
@@ -65,9 +65,9 @@ A top-level `make` will fail if CPS is unbuilt or if `makefile.defs` is not
 properly configured. An example `makefile.defs` corresponding to the above
 configuration example is:
 ```make
-CPSSRC = /path/to/QUDA-CPS/QUDA-CPS_v5_0_26#CPS source code
-CPSGPU = /path/to/QUDA-CPS/cpsgpu#built GPU version
-CPSCPU = /path/to/QUDA-CPS/cpscpu#built scalar version
+CPSSRC = /path/to/QUDA-CPS/QUDA-CPS_v5_0_26 #CPS source code
+CPSGPU = /path/to/QUDA-CPS/cpsgpu           #built GPU version
+CPSCPU = /path/to/QUDA-CPS/cpscpu           #built scalar version
 QUDA = /path/to/quda
 CUDA = /path/to/cuda
 FFTW = /path/to/fftw
@@ -78,7 +78,7 @@ BUILD_SCALAR = yes
 
 Dependencies for all (GPU and scalar) simulation code are: QUDA-CPS 5.0.26 ; FFTW 3
 
-Dependencies for GPU simulation code are: QUDA 0.5.0+ ; CUDA 4.1+
+Dependencies for GPU simulation code are: QUDA 0.5.0x 0.6.x ; CUDA 4.1+
 
 
 	EXTRA FEATURES
@@ -86,33 +86,37 @@ Dependencies for GPU simulation code are: QUDA 0.5.0+ ; CUDA 4.1+
 Several extra features not found in the current CPS release are included 
 in this package:
 
-   1. Stout Gaussian Kernel Link Smearing.
+   1. Stout Gaussian Kernel Link Smearing
+
       This routine applies the link smearing procedure outlined in
       http://arxiv.org/pdf/hep-lat/0311018v1.pdf
-      For the time being only GKLS is supported. Incorporating stout
+      For the time being only `GKLS_STOUT` is supported. Incorporating stout
       smearing into the HMC routines is ongoing.
 
-   2. Z_2 X Z_2 stochastic sources.
+   2. Z_2 X Z_2 stochastic sources
+
       We have included an option to use Z_2 X Z_2 stochastic sources.
-      The enum type is ZTWOXZTWO.   
+      The enum type is `ZTWOXZTWO`.   
 
    3. Diluted/Smeared Stochastic Sources
-      The QPropWRandWall class has been extended to include interlace 
+
+      The `QPropWRandWall` class has been extended to include interlace 
       dilution and/or Jacobi smearing. Please refer to
-      src/alg/alg_qprop/QPropW.C for the necessary arguments one needs
+      `src/alg/alg_qprop/QPropW.C` for the necessary arguments one needs
       to pass to these classes.
 
    4. Diluted/Smeared Momentum Shell sources
-      The QPropWMom class now inherits directly from QPropW. It includes
-      a new member function 'mom_src[]' that is analogous to the 
-      the QPropWRand member function 'rand_src[]'. This new member function 
+
+      The `QPropWMom` class now inherits directly from `QPropW`. It includes
+      a new member function `mom_src[src_phase]` that is analogous to the 
+      the `QPropWRand` member function `rand_src[src_value]'. This new member function 
       is necessary for the calculation of momentum shell sources. The
-      structure of the new QPropWMom and derived classes is the same as
-      the new The QPropWRandWall classes in that one may employ dilution, 
+      structure of the new `QPropWMom` and derived classes is the same as
+      the new `QPropWRandWall` classes in that one may employ dilution, 
       Jacobi smearing, or both.
 
       
-The current release of CPS contains a bug in the function GFWallSource(). We 
+The current release of CPS contains a bug in the function `GFWallSource()`. We 
 have fixed the bug in this release. All changes to the current vanilla 
 version of CPS are delineated by
 
