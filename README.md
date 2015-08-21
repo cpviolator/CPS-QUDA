@@ -19,8 +19,8 @@ modified with repsect to QUDA support is
 are delineated by the compiler flag `#ifdef USEQUDA`
 
 One may utilise the CG or BICGSTAB QUDA inverter type simply by setting the
-CPS inverter type as required. An new CPS enumerator QUDA_GCR_INVERTER 
-has been included to uitise the QUDA GCR inverter.
+CPS inverter type as required. A new CPS enumerator QUDA_GCR_INVERTER 
+has been included to utilise the QUDA GCR inverter.
 
 Examples on how to use the GPU enabled library are given in this release
 for both single hadron and two hadron channels. The modifications 
@@ -78,7 +78,7 @@ BUILD_SCALAR = yes
 
 Dependencies for all (GPU and scalar) simulation code are: QUDA-CPS 5.0.26 ; FFTW 3
 
-Dependencies for GPU simulation code are: QUDA 0.5.0+ ; CUDA 4.1+
+Dependencies for GPU simulation code are: QUDA 0.5.0x 0.6.x ; CUDA 4.1+
 
 
 	EXTRA FEATURES
