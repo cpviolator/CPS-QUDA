@@ -115,10 +115,24 @@ in this package:
       the new `QPropWRandWall` classes in that one may employ dilution, 
       Jacobi smearing, or both.
 
+   5. Smearing and Gauge Fixing
+
+      In order to properly apply the gauge fixing matrices to the source
+      and sink fermion fields, we needed to change the order in which 
+      gauge fixing and smearing are performed. For the source this is a 
+      simple case of reodering some function calls, but for the sink we
+      must move the gauge fixing routine out of `QPropW.Run()` and into
+      `GaussSinkSmearProp()`. As a result, when using gauge fixing and 
+      smeared operators, one must set the new `QPropWArg` flag 
+      `smeared_snk = 1` so that the internal routines can perform gauge
+      fixing in the correct order.   		       
       
-The current release of CPS contains a bug in the function `GFWallSource()`. We 
-have fixed the bug in this release. All changes to the current vanilla 
-version of CPS are delineated by
+      N.B. The current release of CPS contains a bug in the function 
+      `GFWallSource()`. We have fixed the bug in this release. 
+
+        DEVELOPMENT      
+
+All changes to the current vanilla version of CPS are delineated by
 
 	Begin QUDA_CPS
 	      ... code changes ...
