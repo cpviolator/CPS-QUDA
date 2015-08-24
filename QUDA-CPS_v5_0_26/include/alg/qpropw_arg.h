@@ -62,6 +62,10 @@ public:
 	int t;
 	int gauge_fix_src;
 	int gauge_fix_snk;
+	//Begin QUDA_CPS
+	int smeared_src;
+	int smeared_snk;
+	//End QUDA_CPS
 	int store_midprop;
 	int save_prop;
 	int save_ls_prop;

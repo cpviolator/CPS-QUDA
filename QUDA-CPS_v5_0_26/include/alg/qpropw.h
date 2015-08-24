@@ -139,7 +139,14 @@ public:
   //! Is sink gauge fixed?
   int GFixedSnk() const { return qp_arg.gauge_fix_snk; } 
   //! Is source gauge fixed?
+  int GFixedSrc() const { return qp_arg.gauge_fix_snk; } 
 
+  //Begin QUDA_CPS
+  //! Is sink smeared?
+  int SmearedSnk() const { return qp_arg.smeared_snk; } 
+  //! Is source smeared?
+  int SmearedSrc() const { return qp_arg.smeared_snk; } 
+  //End QUDA_CPS
 
   int StoreMidprop() const { return  qp_arg.store_midprop; }
 
