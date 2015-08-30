@@ -139,14 +139,6 @@ void reorder_gauge(void *h_gauge, double *gauge_reord)
     }
   }
 
-  //Hermitean Conjugate
-  double *gauge_herm=(double*)smalloc(4*18*GJP.VolNodeSites()*sizeof(double));
-  double *ptr_herm=gauge_herm;  
-  for(int i=0;i<(18*g_size);i++){
-    if(!(i%2)) ptr_herm[i]=ptr_tran[i];
-    else ptr_herm[i]=(-1)*ptr_tran[i];
-  }
-
   //Reorder the gauge array
   double *ptr_reord = gauge_reord;
   int g_even = 0;
@@ -177,8 +169,6 @@ void reorder_gauge(void *h_gauge, double *gauge_reord)
         }
   
   sfree(gauge_tran);
-  sfree(gauge_herm);
-  
 }
 
 void quda_clover_interface(double *h_quda_clover, double *h_cps_clover)
