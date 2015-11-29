@@ -461,14 +461,9 @@ VRB.Result(cname,fname,"Fclass()=%d\n",lat.Fclass());
    dt_src += dclock();
    VRB.Result(cname, fname, "Time taken to CG: %17.10e seconds.\n",dt_src);
    dt_src = -dclock();
-
-         //Begin QUDA_CPS
-         if(!SmearedSnk()) {
-	   FixSol(sol);
-	   if (StoreMidprop()) FixSol(midsol);
-	 }
-	 //End QUDA_CPS
-
+	 FixSol(sol);
+	 if (StoreMidprop()) FixSol(midsol);
+	 
 	 // Collect solutions in propagator.
 	 LoadRow(spn,col,sol,midsol);
 	 
@@ -2459,9 +2454,6 @@ void QPropW::GaussSmearSinkProp(int t_sink, const QPropWGaussArg &gauss_arg){
       //smear sink
       for(int s(0);s<4;s++)
         tmp.GaussianSmearVector(AlgLattice(),s,gauss_arg.gauss_N,gauss_arg.gauss_W,t_sink);
-      //Begin QUDA_CPS
-      if(GFixedSnk()) FixSol(tmp);
-      //End QUDA_CPS
       //Copy back to propagator
       for(site.Begin();site.End();site.nextSite()){
         int i(site.Index()*SPINOR_SIZE);
