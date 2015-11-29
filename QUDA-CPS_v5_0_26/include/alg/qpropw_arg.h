@@ -60,11 +60,8 @@ public:
 	int t;
 	int gauge_fix_src;
 	int gauge_fix_snk;
-<<<<<<< HEAD
 	int smeared_src;
 	int smeared_snk;
-=======
->>>>>>> parent of 505e429... Added a new member to the argument structure for `QPropWArg` that
 	int store_midprop;
 	int save_prop;
 	int save_ls_prop;
@@ -165,17 +162,14 @@ public:
 	 bool Encode(char *filename,char *instance);
 	 bool Decode(char *filename,char *instance);
 	 bool Vml(VML *vmls,char *instance);
-	 int gauss_N;
-	 Float gauss_W;
-	 int nt;
-	 int mt[5];
-	 GaussianKernelLinkSmearType gauss_link_smear_type;
-	 int gauss_link_smear_N;
-	 Float gauss_link_smear_coeff;
-	 //Begin QUDA-CPS
-	 int gauss_link_smear_ortho;
-	 //End QUDA-CPS
-	 QPropWGaussArg (  ) ;
+	int gauss_N;
+	Float gauss_W;
+	int nt;
+	int mt[5];
+	GaussianKernelLinkSmearType gauss_link_smear_type;
+	int gauss_link_smear_N;
+	Float gauss_link_smear_coeff;
+	   QPropWGaussArg (  ) ;
 };
 
 /* the xdr functions */

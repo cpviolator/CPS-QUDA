@@ -8,6 +8,10 @@ QPropWArg::QPropWArg()
   t(0),
   gauge_fix_src(0),
   gauge_fix_snk(0),
+  //Begin QUDA_CPS
+  smeared_src(0),
+  smeared_snk(0),
+  //End QUDA_CPS
   store_midprop(0),
   save_prop(0),
   save_ls_prop(0),
@@ -45,10 +49,7 @@ QPropWGaussArg::QPropWGaussArg()
   :gauss_N(30),gauss_W(4.35),
    gauss_link_smear_type(GKLS_NONE),
    gauss_link_smear_N(0),
-   gauss_link_smear_coeff(0),
-   //Begin QUDA-CPS
-   gauss_link_smear_ortho(-1)
-   //End QUDA-CPS
+  gauss_link_smear_coeff(0)
 {};
 
 CPS_END_NAMESPACE

@@ -139,7 +139,6 @@ public:
   //! Is sink gauge fixed?
   int GFixedSnk() const { return qp_arg.gauge_fix_snk; } 
   //! Is source gauge fixed?
-<<<<<<< HEAD
   //int GFixedSrc() const { return qp_arg.gauge_fix_snk; } 
 
   //Begin QUDA_CPS
@@ -148,9 +147,6 @@ public:
   //! Is source smeared?
   int SmearedSrc() const { return qp_arg.smeared_snk; } 
   //End QUDA_CPS
-=======
-
->>>>>>> parent of 505e429... Added a new member to the argument structure for `QPropWArg` that
 
   int StoreMidprop() const { return  qp_arg.store_midprop; }
 
