@@ -40,9 +40,7 @@ enum RandomType {
 	GAUSS = 0,
 	UONE = 1,
 	ZTWO = 2,
-	//Begin QUDA_CPS
 	ZTWOXZTWO = 3,
-	//End QUDA_CPS
 	NORAND = 4,
 };
 typedef enum RandomType RandomType;
@@ -62,10 +60,8 @@ public:
 	int t;
 	int gauge_fix_src;
 	int gauge_fix_snk;
-	//Begin QUDA_CPS
 	int smeared_src;
 	int smeared_snk;
-	//End QUDA_CPS
 	int store_midprop;
 	int save_prop;
 	int save_ls_prop;
@@ -173,7 +169,10 @@ public:
 	GaussianKernelLinkSmearType gauss_link_smear_type;
 	int gauss_link_smear_N;
 	Float gauss_link_smear_coeff;
-	   QPropWGaussArg (  ) ;
+	//Begin QUDA-CPS
+	int gauss_link_smear_ortho;
+	//End QUDA-CPS
+	QPropWGaussArg (  ) ;
 };
 
 /* the xdr functions */

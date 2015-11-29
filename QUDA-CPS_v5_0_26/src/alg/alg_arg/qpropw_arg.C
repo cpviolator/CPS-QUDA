@@ -46,6 +46,7 @@ struct vml_enum_map RandomType_map[] = {
 	{"RandomType","GAUSS",GAUSS},
 	{"RandomType","UONE",UONE},
 	{"RandomType","ZTWO",ZTWO},
+	{"RandomType","ZTWOXZTWO",ZTWOXZTWO},
 	{"RandomType","NORAND",NORAND},
 	{NULL,NULL,0}
 };
@@ -87,6 +88,10 @@ vml_QPropWArg (VML *vmls, char *name,QPropWArg *objp)
 	 if (!vml_int (vmls, "gauge_fix_src", &objp->gauge_fix_src))
 		 return FALSE;
 	 if (!vml_int (vmls, "gauge_fix_snk", &objp->gauge_fix_snk))
+		 return FALSE;
+	 if (!vml_int (vmls, "smeared_src", &objp->smeared_src))
+		 return FALSE;
+	 if (!vml_int (vmls, "smeared_snk", &objp->smeared_snk))
 		 return FALSE;
 	 if (!vml_int (vmls, "store_midprop", &objp->store_midprop))
 		 return FALSE;
@@ -374,6 +379,10 @@ vml_QPropWGaussArg (VML *vmls, char *name,QPropWGaussArg *objp)
 		 return FALSE;
 	 if (!vml_Float (vmls, "gauss_link_smear_coeff", &objp->gauss_link_smear_coeff))
 		 return FALSE;
+	 //Begin QUDA-CPS
+	 if (!vml_int (vmls, "gauss_link_smear_ortho", &objp->gauss_link_smear_ortho))
+		 return FALSE;
+	 //Begin QUDA-CPS
 	 vml_class_end(vmls,"QPropWGaussArg",name);
 	return TRUE;
 }
