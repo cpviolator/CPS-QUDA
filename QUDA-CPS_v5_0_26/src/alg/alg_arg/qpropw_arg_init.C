@@ -51,7 +51,7 @@ QPropWGaussArg::QPropWGaussArg()
    gauss_link_smear_N(0),
    gauss_link_smear_coeff(0),
    //Begin QUDA-CPS
-   gauss_link_smear_ortho(-1)
+   gauss_link_smear_ortho(3)
    //End QUDA-CPS
 {};
 
