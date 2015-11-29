@@ -144,5 +144,8 @@ class QPropWGaussArg{
     GaussianKernelLinkSmearType gauss_link_smear_type;
     int gauss_link_smear_N;
     Float gauss_link_smear_coeff;
+    /* Begin QUDA-CPS */
+    int gauss_link_smear_ortho;
+    /* End QUDA-CPS */
   memfun QPropWGaussArg();
 };

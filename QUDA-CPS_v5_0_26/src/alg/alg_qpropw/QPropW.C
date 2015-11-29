@@ -2176,7 +2176,12 @@ void QPropW::DoLinkSmear(const QPropWGaussArg& gauss_arg) {
       {
 	ApeSmearArg asa;
 	asa.coef = gauss_arg.gauss_link_smear_coeff;
-	asa.orthog = 3; // set the smear orthogonal direction to temporal
+	//Begin QUDA_CPS
+	asa.orthog = gauss_arg.gauss_link_smear_ortho;
+	// Setting the smear orthogonal direction to temporal (3)
+	// is equivalent to setting \rho_44 = 0; \rho_ii = coef[i] for i=1,2,3.
+	// The defualt value is -1 (all directions smeared)
+	//End QUDA_CPS 
 	AlgApeSmear as(lattice,&ca,&asa,1);
 	for(int i=0;i<gauss_arg.gauss_link_smear_N;i++)
 	  as.run();
@@ -2187,8 +2192,10 @@ void QPropW::DoLinkSmear(const QPropWGaussArg& gauss_arg) {
       {
 	StoutSmearArg asa;
 	asa.coef = gauss_arg.gauss_link_smear_coeff;
-	asa.orthog = 3; // set the smear orthogonal direction to temporal.
-	// This is equivalent to setting \rho_44 = 0; \rho_ii = coef for i=1,2,3.
+	asa.orthog = gauss_arg.gauss_link_smear_ortho; 
+	// Setting the smear orthogonal direction to temporal (3)
+	// is equivalent to setting \rho_44 = 0; \rho_ii = coef[i] for i=1,2,3.
+	// The defualt value is -1 (all directions smeared)
 	AlgStoutSmear as(lattice,&ca,&asa);
 	for(int i=0; i<gauss_arg.gauss_link_smear_N; i++) {
 	  as.run();
