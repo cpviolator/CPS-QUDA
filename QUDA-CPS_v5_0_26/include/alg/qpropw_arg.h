@@ -162,17 +162,17 @@ public:
 	 bool Encode(char *filename,char *instance);
 	 bool Decode(char *filename,char *instance);
 	 bool Vml(VML *vmls,char *instance);
-	int gauss_N;
-	Float gauss_W;
-	int nt;
-	int mt[5];
-	GaussianKernelLinkSmearType gauss_link_smear_type;
-	int gauss_link_smear_N;
-	Float gauss_link_smear_coeff;
-	//Begin QUDA-CPS
-	int gauss_link_smear_ortho;
-	//End QUDA-CPS
-	QPropWGaussArg (  ) ;
+	 int gauss_N;
+	 Float gauss_W;
+	 int nt;
+	 int mt[5];
+	 GaussianKernelLinkSmearType gauss_link_smear_type;
+	 int gauss_link_smear_N;
+	 Float gauss_link_smear_coeff;
+	 //Begin QUDA-CPS
+	 int gauss_link_smear_ortho;
+	 //End QUDA-CPS
+	 QPropWGaussArg (  ) ;
 };
 
 /* the xdr functions */
