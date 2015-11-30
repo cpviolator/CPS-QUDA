@@ -225,21 +225,21 @@ void AlgPot::run()
 	    int x[4]={0,0,0,0};
 	    Matrix LOOP;
 	    LOOP.ZeroMatrix();
-	    Complex pot=0.;
+	    Complex pot=0.0;
 
 	    for(x[0]=0;x[0]<GJP.XnodeSites();x[0]++)
 	      for(x[1]=0;x[1]<GJP.YnodeSites();x[1]++)
 		for(x[2]=0;x[2]<GJP.ZnodeSites();x[2]++)
 		  for(x[3]=0;x[3]<GJP.TnodeSites();x[3]++){
-		    //  lat.PathOrdProdPlus(LOOP, x, path, nlinks);
+		    lat.PathOrdProdPlus(LOOP, x, path, nlinks);
 		    	   
-		    lat.PathOrdProd(LOOP, x, path, nlinks);
-		    pot += LOOP.Tr();
+		    //lat.PathOrdProd(LOOP, x, path, nlinks);
+		    //pot += LOOP.Tr();
 		   
 		  } // end loop over all local origins
 
 	    // for PathOrdProdPlus calculate trace of accumulated LOOP
-	    // pot = LOOP.Tr();
+	    pot = LOOP.Tr();
  
 	    // printf("Trace = %e %e  \n", real(pot),imag(pot));
 
@@ -262,8 +262,10 @@ void AlgPot::run()
 	    // e.g.  r=5 is either (5,0,0) or (4,3,0)
 	    // treat those seperately here
 
-	    char *filename="Wt_x_y_z"; // example name
-	    sprintf(filename,"Wt_%d_%d_%d",ext1,ext2,ext3);
+	    //Begin QUDA-CPS
+	    char filename[256]; 
+	    sprintf(filename,"Wt_%d_%d_%d.dat",ext1,ext2,ext3);
+	    //End QUDA-CPS
 	    FILE *fp= Fopen(filename, "a");
 	    Float pot_tmp_real = real(pot);
 	    Float pot_tmp_imag = imag(pot);
@@ -282,8 +284,9 @@ void AlgPot::run()
       } // end for ext1
       
       // dump the averaged potential for all r2 at this timeslice
-      FILE *fp= Fopen("Wts", "a");
-      
+      //Begin QUDA-CPS
+      FILE *fp= Fopen("Wts.dat", "a");
+      //End QUDA-CPS
       for (r2=0; r2 < max_r2; r2++){
 	if (number[r2]!=0) {
 	  Complex W =  Wts[r2]/number[r2];
