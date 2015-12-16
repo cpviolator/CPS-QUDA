@@ -95,7 +95,8 @@ void Matrix::exp_iQ(void)
 
   //[14] c0 = det(Q) = 1/3Tr(Q^3)
   Q.Det(det);
-
+  c0 = det[0];
+  
   //[15] c1 = 1/2Tr(Q^2)
   // Q = Q^dag => Tr(Q^2) = Tr(QQ^dag) = sum_ab [Q_ab * Q_ab^*]
   temp1.DotMEqual(Q,Q);
