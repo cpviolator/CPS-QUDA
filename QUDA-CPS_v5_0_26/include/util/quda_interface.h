@@ -4,10 +4,10 @@
 
 USING_NAMESPACE_CPS
 
-void fillCloverAll(Lattice &lat, double *h_quda_clover, ChkbType chkb, 
+void fillClover(Lattice &lat, double *h_quda_clover, ChkbType chkb, 
 		   DiracOpClover dirac);
 
-void fillCloverAll(Lattice &lat, double *h_quda_clover_inv, ChkbType chkb, 
+void fillCloverInv(Lattice &lat, double *h_quda_clover_inv, ChkbType chkb, 
 		   DiracOpClover dirac);
 
 void quda_clover_interface(double *h_quda_clover,  double *h_cps_clover);
