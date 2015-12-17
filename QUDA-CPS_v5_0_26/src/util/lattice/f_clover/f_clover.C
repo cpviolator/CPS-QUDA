@@ -264,22 +264,13 @@ int Fclover::FmatInv(Vector *f_out, Vector *f_in,
   double *h_quda_clover_inv = (double*)smalloc(num_bytes);
   double *h_quda_clover = (double*)smalloc(num_bytes);
 
-  fillCloverAll(*this, h_quda_clover, h_quda_clover_inv,chkb,
-		cg_arg, cnv_frm, prs_f_in, clover);
+  fillClover(*this, h_quda_clover, chkb, clover);
+  //fillCloverInv(*this, h_quda_clover_inv, chkb, clover);
 
-  set_quda_params(cg_arg);
-  
-  StrOrdType to = WILSON;
-  StrOrdType from = CANONICAL;
-  Fconvert(f_in, to, from);
-  
+  set_quda_params(cg_arg);  
   inversion_clover(*this, h_quda_clover, h_quda_clover_inv, 
 		   f_in, f_out);
   
-  to = CANONICAL;
-  from = WILSON ;
-  Fconvert(f_out, to, from);
-
   sfree(h_quda_clover_inv);
   sfree(h_quda_clover);
   iter = 1;

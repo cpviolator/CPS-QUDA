@@ -24,14 +24,10 @@ QudaInvertParam inv_param;
 QudaGaugeParam param;
 QudaPrecision cpu_prec;
 
-void fillCloverAll(Lattice &lat, double *h_quda_clover, 
-		   double *h_quda_clover_inv, ChkbType chkb, CgArg *cg_arg, 
-		   CnvFrmType cnv_frm, PreserveType prs_f_in, 
-		   DiracOpClover dirac)
+void fillClover(Lattice &lat, double *h_quda_clover, ChkbType chkb, 
+		DiracOpClover dirac)
 {
-  double *ptr_clover_quda_inv = h_quda_clover_inv;
-  double *ptr_clover_quda = h_quda_clover;
-  
+  double *ptr_clover_quda = h_quda_clover;  
   dirac.CloverMatChkb(chkb, 0);
   double *ptr_clover_cps = (double *)(chkb==CHKB_EVEN ? 
 				      lat.Aux0Ptr() : lat.Aux1Ptr());
@@ -52,7 +48,12 @@ void fillCloverAll(Lattice &lat, double *h_quda_clover,
     ptr_clover_quda += CLOVER_MAT_SIZE;
     ptr_clover_cps += CLOVER_MAT_SIZE;
   }
+}
 
+void fillCloverInv(Lattice &lat, double *h_quda_clover_inv, ChkbType chkb, 
+		   DiracOpClover dirac)
+{
+  double *ptr_clover_quda_inv = h_quda_clover_inv;
   dirac.CloverMatChkb(chkb, 1);
   double *ptr_clover_cps_inv = (double *)(chkb==CHKB_EVEN ? 
 					  lat.Aux0Ptr() : lat.Aux1Ptr());
@@ -61,7 +62,7 @@ void fillCloverAll(Lattice &lat, double *h_quda_clover,
     ptr_clover_quda_inv += CLOVER_MAT_SIZE;
     ptr_clover_cps_inv += CLOVER_MAT_SIZE;
   }
-
+  ChkbType chkb_opp = (chkb == CHKB_EVEN ? CHKB_ODD : CHKB_EVEN );
   dirac.CloverMatChkb(chkb_opp, 1);
   ptr_clover_cps_inv = (double *)(chkb_opp == CHKB_EVEN ? 
 				  lat.Aux0Ptr() : lat.Aux1Ptr());
@@ -77,98 +78,26 @@ void fillCloverAll(Lattice &lat, double *h_quda_clover,
 void inversion_clover(Lattice &lat, double *h_quda_clover, 
 		      double *h_quda_clover_inv, Vector *f_in, Vector *f_out)
 { 
-  int f_size_cb = GJP.VolNodeSites() * lat.FsiteSize();
-  void *h_gauge=(void*)lat.GaugeField();
-  double *gauge_reord=(double*)smalloc(4*18*GJP.VolNodeSites()*sizeof(double));
+  double *h_gauge=(double*)lat.GaugeField();
   
-  reorder_gauge(h_gauge, gauge_reord);
-  
+  lat.Convert(WILSON, f_out, f_in);
+
   // 1 = initialize, else just calculate.
   if (gaugecounter == 1){
     freeGaugeQuda();
-    loadGaugeQuda(gauge_reord, &param);
+    loadGaugeQuda(h_gauge, &param);
     freeCloverQuda();
-    loadCloverQuda(h_quda_clover, h_quda_clover_inv, &inv_param);
+    void *n_ptr1 = NULL;
+    void *n_ptr2 = NULL;
+    loadCloverQuda(h_quda_clover, n_ptr2, &inv_param);
+    //loadCloverQuda(h_quda_clover, h_quda_clover_inv, &inv_param);
+    //loadCloverQuda(n_ptr, n_ptr, &inv_param);
     gaugecounter=0;
   }
-  
-  double *bQUDA=(double*)smalloc(f_size_cb*sizeof(double));
-  double *pb=(double*)f_in;
-  for (int i=0;i<(f_size_cb/2);i++) {
-    bQUDA[i]=pb[i+f_size_cb/2];
-    bQUDA[i+f_size_cb/2]=pb[i];
-  }
-  
-  double *xQUDA=(double*)smalloc(f_size_cb*sizeof(double));
-  double *px=(double*)f_out;
-  for (int i=0;i<(f_size_cb/2);i++) {
-    xQUDA[i]=px[i+f_size_cb/2];
-    xQUDA[i+f_size_cb/2]=px[i];
-  }
-  invertQuda((void*)xQUDA, (void*)bQUDA, &inv_param);
-  for (int i=0;i<(f_size_cb/2);i++) {
-    px[i]=xQUDA[i+f_size_cb/2];
-    px[i+f_size_cb/2]=xQUDA[i];
-  }
 
-  sfree(gauge_reord);
-  sfree(bQUDA);
-  sfree(xQUDA);
+  invertQuda((void*)f_out, (void*)f_in, &inv_param);
   
-}
-
-void reorder_gauge(void *h_gauge, double *gauge_reord)
-{
-  int g_size = 4*GJP.VolNodeSites();
-  
-  //Transpose
-  double *gauge_tran=(double*)smalloc(4*18*GJP.VolNodeSites()*sizeof(double));
-  double *ptr_orig=(double*)h_gauge;
-  double *ptr_tran=gauge_tran;
-  for(int i=0;i<(18*g_size);i=i+18){
-    for(int j=0;j<2;j++){
-      ptr_tran[i+j]    = ptr_orig[i+j];
-      ptr_tran[i+2+j]  = ptr_orig[i+6+j];
-      ptr_tran[i+4+j]  = ptr_orig[i+12+j];
-      ptr_tran[i+6+j]  = ptr_orig[i+2+j];
-      ptr_tran[i+8+j]  = ptr_orig[i+8+j];
-      ptr_tran[i+10+j] = ptr_orig[i+14+j];
-      ptr_tran[i+12+j] = ptr_orig[i+4+j];
-      ptr_tran[i+14+j] = ptr_orig[i+10+j];
-      ptr_tran[i+16+j] = ptr_orig[i+16+j];
-    }
-  }
-
-  //Reorder the gauge array
-  double *ptr_reord = gauge_reord;
-  int g_even = 0;
-  int g_odd  = 18*4*GJP.VolNodeSites()/2;
-
-  int T = 0;
-  int Z = 0;
-  int Y = 0;
-  int X = 0;
-  int index = 0;
-
-  for(T=0 ; T<GJP.TnodeSites();T++)
-    for(Z=0 ; Z<GJP.ZnodeSites();Z++)
-      for(Y=0 ; Y<GJP.YnodeSites();Y++)
-        for(X=0 ; X<GJP.XnodeSites();X++){
-          index = (X+GJP.XnodeSites()*(Y+GJP.YnodeSites()
-				       *(Z+GJP.ZnodeSites()*T)));
-          if(!((X+Y+Z+T)%2)){
-            for(int l=0;l<18*4;l++)
-	      ptr_reord[g_even+l] = ptr_tran[72*index+l];	    
-            g_even += 18*4;
-          }
-          else{
-            for(int l=0;l<18*4;l++)
-	      ptr_reord[g_odd+l] = ptr_tran[72*index+l];
-            g_odd += 18*4;
-          }
-        }
-  
-  sfree(gauge_tran);
+  lat.Convert(CANONICAL, f_out, f_in);
 }
 
 void quda_clover_interface(double *h_quda_clover, double *h_cps_clover)
@@ -320,6 +249,7 @@ void set_quda_params(CgArg *cg_arg)
   inv_param.cuda_prec_precondition = QUDA_DOUBLE_PRECISION;
   inv_param.clover_cuda_prec_sloppy = QUDA_DOUBLE_PRECISION;
   inv_param.clover_cuda_prec_precondition = QUDA_DOUBLE_PRECISION;
+  inv_param.clover_coeff = GJP.CloverCoeff();
   inv_param.cpu_prec = QUDA_DOUBLE_PRECISION;
   
   inv_param.twist_flavor = QUDA_TWIST_NO;
@@ -334,21 +264,16 @@ void set_quda_params(CgArg *cg_arg)
   inv_param.kappa = 1.0/(2.0*(4.0+mass));
   inv_param.mass_normalization = QUDA_KAPPA_NORMALIZATION;
   inv_param.dagger = QUDA_DAG_NO;
-  //changed from QUDA_MATPCDAG_MATPC_SOLUTION to current.
   inv_param.solution_type = QUDA_MAT_SOLUTION;
-  // Options: QUDA_DIRECT_SOLVE, QUDA_NORMOP_SOLVE, QUDA_DIRECT_PC_SOLVE, QUDA_NORMOP_PC_SOLVE, QUDA_INVALID_SOLVE
   inv_param.solve_type = QUDA_NORMOP_PC_SOLVE; 
   inv_param.matpc_type = QUDA_MATPC_EVEN_EVEN;
   inv_param.preserve_source = QUDA_PRESERVE_SOURCE_YES;
   inv_param.gamma_basis = QUDA_DEGRAND_ROSSI_GAMMA_BASIS; 
-  // Options: QUDA_CPS_WILSON_DIRAC_ORDER
-  inv_param.dirac_order = QUDA_DIRAC_ORDER; 
+  inv_param.dirac_order = QUDA_CPS_WILSON_DIRAC_ORDER; 
   inv_param.tune = QUDA_TUNE_NO;
   inv_param.use_init_guess = QUDA_USE_INIT_GUESS_YES;
-  // QUDA_VERBOSE, SILENT, DEBUG_VERBOSE, SUMMARIZE
+  // QUDA_VERBOSE, QUDA_SILENT, QUDA_DEBUG_VERBOSE, SUMMARIZE
   inv_param.verbosity = QUDA_SUMMARIZE; 
-  // QUDA_PACKED_CLOVER_ORDER: even-odd, packed
-  // QUDA_LEX_PACKED_CLOVER_ORDER: lexicographical order, packed 
   inv_param.clover_order = QUDA_PACKED_CLOVER_ORDER;
 }
 #endif
