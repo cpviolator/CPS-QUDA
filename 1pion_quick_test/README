@@ -1,0 +1,8 @@
+This code is useful for quickly comparing results bewteen your CPU
+and GPU builds of CPS.
+
+To use it, edit the makefile so that it knows where your
+CPS, QUDA, and CUDA builds are. The first time you run the code,
+a small lattice will be generated. On subsequent test runs,
+uncomment the line `#define READ` and the code will read in that
+lattice.
