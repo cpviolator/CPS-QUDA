@@ -100,6 +100,24 @@ void inversion_clover(Lattice &lat, double *h_quda_clover,
   lat.Convert(CANONICAL, f_out, f_in);
 }
 
+void inversion_wilson(Lattice &lat, Vector *f_in, Vector *f_out)
+{ 
+
+  lat.Convert(WILSON, f_out, f_in);
+  double *h_gauge=(double*)lat.GaugeField();
+
+  // 1 = initialize, else just calculate.
+  if (gaugecounter == 1){
+    freeGaugeQuda();
+    loadGaugeQuda(h_gauge, &param);
+    gaugecounter=0;
+  }
+  
+  invertQuda((void*)f_out, (void*)f_in, &inv_param);
+  return;
+  lat.Convert(CANONICAL, f_out, f_in);
+}
+
 void quda_clover_interface(double *h_quda_clover, double *h_cps_clover)
 {
   h_quda_clover[0]=h_cps_clover[0];    // c00_00_re = C0.x, A0
