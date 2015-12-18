@@ -15,6 +15,8 @@ void quda_clover_interface(double *h_quda_clover,  double *h_cps_clover);
 void inversion_clover(Lattice &lat, double *h_quda_clover, 
 		      double *h_quda_clover_inv, Vector *f_in, Vector *f_out);
 
+void inversion_wilson(Lattice &lat, Vector *f_in, Vector *f_out);
+
 void set_quda_params(CgArg *cg_arg, int WilClo);
 
 #endif

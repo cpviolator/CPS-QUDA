@@ -49,7 +49,19 @@ unsigned long WfmFlops;
 #endif
 #endif
 
+//Begin QUDA_CPS
+#ifdef USEQUDA
+#include <iostream>
+using namespace std;
+#include <util/quda_interface.h>
+#include <quda.h>
+
 CPS_START_NAMESPACE
+
+#else
+CPS_START_NAMESPACE
+#endif
+//End QUDA_CPS
 
 //------------------------------------------------------------------
 // Initialize static variables.
