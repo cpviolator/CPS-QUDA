@@ -274,9 +274,19 @@ int Fwilson::FmatInv(Vector *f_out, Vector *f_in,
   VRB.Func(cname,fname);
 
   DiracOpWilson wilson(*this, f_out, f_in, cg_arg, cnv_frm);
+
+  //Begin QUDA_CPS
+#ifdef USEQUDA
+
+  int WilClo = 0;
+  set_quda_params(cg_arg,WilClo);  
+  inversion_wilson(*this, f_in, f_out);
   
+  iter = 1;
+#else  
   iter = wilson.MatInv(true_res, prs_f_in);
-  
+#endif
+  //End QUDA_CPS
   // Return the number of iterations
   return iter;
 }
@@ -403,6 +413,13 @@ int Fwilson::FeigSolv(Vector **f_eigenv, Float *lambda,
   return iter;
 }
 
+//Begin QUDA_CPS
+#ifdef USEQUDA
+CPS_END_NAMESPACE
+#undef DagType
+CPS_START_NAMESPACE
+#endif
+//End QUDA_CPS
 
 //------------------------------------------------------------------
 // SetPhi(Vector *phi, Vector *frm1, Vector *frm2, Float mass,

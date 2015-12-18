@@ -177,7 +177,7 @@ void quda_clover_interface(double *h_quda_clover, double *h_cps_clover)
   h_quda_clover[35+36]=h_cps_clover[34+36];  // c32_31_im = C8.w, A5
 }
 
-void set_quda_params(CgArg *cg_arg)
+void set_quda_params(CgArg *cg_arg, int WilClo)
 {
   ///////////////////////////////////////////////////////////////////
   // For the reconstruct type we must be careful. We must use 
@@ -220,7 +220,8 @@ void set_quda_params(CgArg *cg_arg)
   inv_param = newQudaInvertParam();
 
   inv_param.clover_cpu_prec = QUDA_DOUBLE_PRECISION; //QUDA precision type
-  inv_param.dslash_type = QUDA_CLOVER_WILSON_DSLASH;
+  if(WilClo == 0) inv_param.dslash_type = QUDA_WILSON_DSLASH;
+  if(WilClo == 1) inv_param.dslash_type = QUDA_CLOVER_WILSON_DSLASH;
   
   //Options: QUDA_CG_INVERTER, QUDA_GCR_INVERTER, QUDA_BICGSTAB_INVERTER
   switch(cg_arg->Inverter){    
@@ -264,9 +265,19 @@ void set_quda_params(CgArg *cg_arg)
   inv_param.kappa = 1.0/(2.0*(4.0+mass));
   inv_param.mass_normalization = QUDA_KAPPA_NORMALIZATION;
   inv_param.dagger = QUDA_DAG_NO;
-  inv_param.solution_type = QUDA_MAT_SOLUTION;
-  inv_param.solve_type = QUDA_NORMOP_PC_SOLVE; 
-  inv_param.matpc_type = QUDA_MATPC_EVEN_EVEN;
+
+  if(WilClo == 0) {
+    inv_param.solution_type = QUDA_MAT_SOLUTION;
+    inv_param.solve_type = QUDA_NORMOP_PC_SOLVE; 
+    inv_param.matpc_type = QUDA_MATPC_EVEN_EVEN;
+  }
+  
+  if(WilClo == 1) {
+    inv_param.solution_type = QUDA_MAT_SOLUTION;
+    inv_param.solve_type = QUDA_DIRECT_PC_SOLVE; 
+    inv_param.matpc_type = QUDA_MATPC_EVEN_EVEN_ASYMMETRIC;
+  }
+
   inv_param.preserve_source = QUDA_PRESERVE_SOURCE_YES;
   inv_param.gamma_basis = QUDA_DEGRAND_ROSSI_GAMMA_BASIS; 
   inv_param.dirac_order = QUDA_CPS_WILSON_DIRAC_ORDER; 

@@ -267,7 +267,8 @@ int Fclover::FmatInv(Vector *f_out, Vector *f_in,
   fillClover(*this, h_quda_clover, chkb, clover);
   //fillCloverInv(*this, h_quda_clover_inv, chkb, clover);
 
-  set_quda_params(cg_arg);  
+  int WilClo = 1;
+  set_quda_params(cg_arg,WilClo);  
   inversion_clover(*this, h_quda_clover, h_quda_clover_inv, 
 		   f_in, f_out);
   
