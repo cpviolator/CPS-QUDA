@@ -1,6 +1,6 @@
 CPSCPU=/path/to/CPU CPS build
 CPSGPU=/path/to/GPU CPS build
-QUDA=/path/tp/quda
+QUDA=/path/to/quda
 CUDA=/path/to/cuda
 
 NVCC = nvcc -arch=sm_20
