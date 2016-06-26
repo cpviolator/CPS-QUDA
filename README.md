@@ -2,11 +2,12 @@ Welcome to the QUDA enabled Columbia Physics System!
 
 	GPU SUPPORT
 
-This CPS library has been modified to offer limited GPU support. Currently 
-supported fermion inverters are listed below:
+This CPS library has been modified to offer limited GPU support for 
+fermion inverters. Currently supported fermions are::
 
 	  1. Clover Fermions
 	  2. Wilson Fermions
+	  3. Twisted Mass (Wilson)
 
 All files and functions needed to enable QUDA support are contained in the
 directory `src/util/quda_interface` and the header file 
