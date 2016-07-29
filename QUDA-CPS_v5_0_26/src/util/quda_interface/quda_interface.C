@@ -24,10 +24,13 @@ QudaInvertParam inv_param;
 QudaGaugeParam param;
 QudaPrecision cpu_prec;
 
-void fillClover(Lattice &lat, double *h_quda_clover, ChkbType chkb, 
-		DiracOpClover dirac)
+void fillCloverAll(Lattice &lat, double *h_quda_clover, 
+		   double *h_quda_clover_inv, ChkbType chkb, CgArg *cg_arg, 
+		   CnvFrmType cnv_frm, DiracOpClover dirac)
 {
-  double *ptr_clover_quda = h_quda_clover;  
+  double *ptr_clover_quda_inv = h_quda_clover_inv;
+  double *ptr_clover_quda = h_quda_clover;
+  
   dirac.CloverMatChkb(chkb, 0);
   double *ptr_clover_cps = (double *)(chkb==CHKB_EVEN ? 
 				      lat.Aux0Ptr() : lat.Aux1Ptr());
@@ -48,12 +51,7 @@ void fillClover(Lattice &lat, double *h_quda_clover, ChkbType chkb,
     ptr_clover_quda += CLOVER_MAT_SIZE;
     ptr_clover_cps += CLOVER_MAT_SIZE;
   }
-}
 
-void fillCloverInv(Lattice &lat, double *h_quda_clover_inv, ChkbType chkb, 
-		   DiracOpClover dirac)
-{
-  double *ptr_clover_quda_inv = h_quda_clover_inv;
   dirac.CloverMatChkb(chkb, 1);
   double *ptr_clover_cps_inv = (double *)(chkb==CHKB_EVEN ? 
 					  lat.Aux0Ptr() : lat.Aux1Ptr());
@@ -62,7 +60,7 @@ void fillCloverInv(Lattice &lat, double *h_quda_clover_inv, ChkbType chkb,
     ptr_clover_quda_inv += CLOVER_MAT_SIZE;
     ptr_clover_cps_inv += CLOVER_MAT_SIZE;
   }
-  ChkbType chkb_opp = (chkb == CHKB_EVEN ? CHKB_ODD : CHKB_EVEN );
+
   dirac.CloverMatChkb(chkb_opp, 1);
   ptr_clover_cps_inv = (double *)(chkb_opp == CHKB_EVEN ? 
 				  lat.Aux0Ptr() : lat.Aux1Ptr());
@@ -75,47 +73,98 @@ void fillCloverInv(Lattice &lat, double *h_quda_clover_inv, ChkbType chkb,
   }
 }
 
-void inversion_clover(Lattice &lat, double *h_quda_clover, 
-		      double *h_quda_clover_inv, Vector *f_in, Vector *f_out)
+int inversion_clover(Lattice &lat, double *h_quda_clover, 
+		     double *h_quda_clover_inv, Vector *f_in, Vector *f_out,
+		     Float *QUDA_true_res)
 { 
+
+  //Convert to WILSON GAUGE ORDER on the host.
+  lat.Convert(WILSON, f_out, f_in);
+  
+  //Create pointer to gauge array
   double *h_gauge=(double*)lat.GaugeField();
   
-  lat.Convert(WILSON, f_out, f_in);
-
-  // 1 = initialize, else just calculate.
+  // If this is the first spin-colour diluted inversion, free any 
+  // previous gauge field and/or clover terms, then load the new ones. 
   if (gaugecounter == 1){
     freeGaugeQuda();
-    loadGaugeQuda(h_gauge, &param);
     freeCloverQuda();
-    void *n_ptr1 = NULL;
-    void *n_ptr2 = NULL;
-    loadCloverQuda(h_quda_clover, n_ptr2, &inv_param);
-    //loadCloverQuda(h_quda_clover, h_quda_clover_inv, &inv_param);
-    //loadCloverQuda(n_ptr, n_ptr, &inv_param);
+    loadGaugeQuda(h_gauge, &param);
+    loadCloverQuda(h_quda_clover, h_quda_clover_inv, &inv_param);
     gaugecounter=0;
   }
-
+  
+  //Call QUDA inverter
   invertQuda((void*)f_out, (void*)f_in, &inv_param);
   
-  lat.Convert(CANONICAL, f_out, f_in);
+  //Return the number of iterations and pass true residual.
+  *QUDA_true_res = inv_param.true_res;
+  return inv_param.iter;
+  
 }
 
-void inversion_wilson(Lattice &lat, Vector *f_in, Vector *f_out)
+int inversion_wilson(Lattice &lat, Vector *f_in, Vector *f_out, 
+		     Float *QUDA_true_res)
 { 
 
-  lat.Convert(WILSON, f_out, f_in);
+  //Create pointer to gauge array
   double *h_gauge=(double*)lat.GaugeField();
 
-  // 1 = initialize, else just calculate.
+  // If this is the first spin-colour diluted inversion, free any previous 
+  // gauge field and/or clover terms, then load the new ones. 
   if (gaugecounter == 1){
     freeGaugeQuda();
     loadGaugeQuda(h_gauge, &param);
     gaugecounter=0;
   }
   
+  //Call QUDA inverter
   invertQuda((void*)f_out, (void*)f_in, &inv_param);
-  return;
+  
+  //Return the number of iterations and pass true residual.
+  *QUDA_true_res = inv_param.true_res;
+  return inv_param.iter;
+}
+
+//Not working!!!
+int inversion_clover_HMC(Lattice &lat, double *h_quda_clover, 
+			 double *h_quda_clover_inv, Vector *f_in, 
+			 Vector *f_out, Float *QUDA_true_res)
+{ 
+  //Convert to WILSON GAUGE ORDER on the host.
+  lat.Convert(WILSON, f_out, f_in);
+  
+  double *h_gauge=(double*)lat.GaugeField();
+  
+  loadGaugeQuda(h_gauge, &param);
+  loadCloverQuda(h_quda_clover, h_quda_clover_inv, &inv_param);  
+  invertQuda((void**)f_out, (void*)f_in, &inv_param);
+  freeGaugeQuda();
+  freeCloverQuda();
+
+  //Convert to CANONICAL GAUGE ORDER on the host.
   lat.Convert(CANONICAL, f_out, f_in);
+
+  //Return the number of iterations and pass true residual.
+  *QUDA_true_res = inv_param.true_res;
+  return inv_param.iter;
+}
+
+int inversion_wilson_HMC(Lattice &lat, Vector *f_in, Vector *f_out, 
+			 Float *QUDA_true_res)
+{ 
+  //Create pointer to gauge array
+  double *h_gauge=(double*)lat.GaugeField();
+
+  // Load gauge field for each QUDA call as the HMC algorithm updates the 
+  // gauge field with each inversion.
+  loadGaugeQuda(h_gauge, &param);  
+  invertQuda((void*)f_out, (void*)f_in, &inv_param);
+  freeGaugeQuda();
+
+  //Return the number of iterations and pass true residual.
+  *QUDA_true_res = inv_param.true_res;
+  return inv_param.iter;
 }
 
 void quda_clover_interface(double *h_quda_clover, double *h_cps_clover)
@@ -199,23 +248,23 @@ void set_quda_params(CgArg *cg_arg, int WilClo)
 {
   ///////////////////////////////////////////////////////////////////
   // For the reconstruct type we must be careful. We must use 
-  // QUDA_RECONSTRUCT_12 until we better understand the 
+  // QUDA_RECONSTRUCT_NO until we better understand the 
   // unpacking algorithm.
   ///////////////////////////////////////////////////////////////////
 
   param = newQudaGaugeParam();
 
-  // set the CUDA precisions
-  param.reconstruct = QUDA_RECONSTRUCT_12;
+  // set the CUDA sloppy precisions (HALF_PREC)  
+  param.reconstruct_sloppy = QUDA_RECONSTRUCT_NO;
+  param.cuda_prec_sloppy = QUDA_HALF_PRECISION;
+
+  // set the CUDA precisions (DOUBLE)
+  param.reconstruct = QUDA_RECONSTRUCT_NO;
   param.cuda_prec = QUDA_DOUBLE_PRECISION;
 
-  // set the CUDA sloppy precisions  
-  param.reconstruct_sloppy = QUDA_RECONSTRUCT_12;
-  param.cuda_prec_sloppy = QUDA_DOUBLE_PRECISION;
-
-  // set the CUDA precondition precisions
+  // set the CUDA precondition precisions (DOUBLE)
+  param.reconstruct_precondition = QUDA_RECONSTRUCT_NO;
   param.cuda_prec_precondition = QUDA_DOUBLE_PRECISION;
-  param.reconstruct_precondition = QUDA_RECONSTRUCT_12;
   param.cpu_prec = QUDA_DOUBLE_PRECISION; 
   
   param.X[0] = GJP.XnodeSites();
@@ -237,14 +286,13 @@ void set_quda_params(CgArg *cg_arg, int WilClo)
 
   inv_param = newQudaInvertParam();
 
-  inv_param.clover_cpu_prec = QUDA_DOUBLE_PRECISION; //QUDA precision type
   if(WilClo == 0) inv_param.dslash_type = QUDA_WILSON_DSLASH;
   if(WilClo == 1) inv_param.dslash_type = QUDA_CLOVER_WILSON_DSLASH;
   
   //Options: QUDA_CG_INVERTER, QUDA_GCR_INVERTER, QUDA_BICGSTAB_INVERTER
   switch(cg_arg->Inverter){    
   case CG : 
-    inv_param.inv_type       = QUDA_CG_INVERTER;
+    inv_param.inv_type = QUDA_CG_INVERTER;
     printf("QUDA CG \n");
     break;
   case BICGSTAB : 
@@ -262,18 +310,124 @@ void set_quda_params(CgArg *cg_arg, int WilClo)
     printf("QUDA DEFAULT = GCR\n");
   }
 
-  inv_param.clover_cuda_prec = QUDA_DOUBLE_PRECISION;
+  //Use HALF_PREC for sloppy
+  inv_param.cuda_prec_sloppy = QUDA_HALF_PRECISION;
+  if(WilClo == 1) inv_param.clover_cuda_prec_sloppy = QUDA_HALF_PRECISION;
+
+  //Use DOUBLE for everything else
   inv_param.cuda_prec = QUDA_DOUBLE_PRECISION;
-  inv_param.cuda_prec_sloppy = QUDA_DOUBLE_PRECISION;
   inv_param.cuda_prec_precondition = QUDA_DOUBLE_PRECISION;
-  inv_param.clover_cuda_prec_sloppy = QUDA_DOUBLE_PRECISION;
-  inv_param.clover_cuda_prec_precondition = QUDA_DOUBLE_PRECISION;
-  inv_param.clover_coeff = GJP.CloverCoeff();
   inv_param.cpu_prec = QUDA_DOUBLE_PRECISION;
+
+  if(WilClo == 1) {
+    inv_param.clover_cuda_prec = QUDA_DOUBLE_PRECISION;
+    inv_param.clover_cuda_prec_precondition = QUDA_DOUBLE_PRECISION;
+    inv_param.clover_cpu_prec = QUDA_DOUBLE_PRECISION;
+    inv_param.clover_coeff = GJP.CloverCoeff();
+  }
   
   inv_param.twist_flavor = QUDA_TWIST_NO;
-  inv_param.maxiter = cg_arg->max_num_iter; //dirac_arg.max_num_iter;
-  inv_param.reliable_delta = 1e-3;          //QudaParam.reliable_delta;
+  inv_param.maxiter = cg_arg->max_num_iter; 
+  inv_param.reliable_delta = 1e-1;          
+  inv_param.tol = cg_arg->stop_rsd;
+  inv_param.Ls = 0;
+  inv_param.cl_pad = 0;
+  inv_param.sp_pad = 0;
+
+  //Get CPS m_{0}
+  double mass = cg_arg->mass;
+  inv_param.kappa = 1.0/(2.0*(4.0+mass));
+  inv_param.mass_normalization = QUDA_KAPPA_NORMALIZATION;
+  inv_param.dagger = QUDA_DAG_NO;
+
+  //Delcare MAT solution, do precondition on the device
+  inv_param.solution_type = QUDA_MAT_SOLUTION;
+  inv_param.solve_type = QUDA_NORMOP_PC_SOLVE; 
+  inv_param.matpc_type = QUDA_MATPC_EVEN_EVEN;
+  inv_param.preserve_source = QUDA_PRESERVE_SOURCE_YES;
+  inv_param.gamma_basis = QUDA_DEGRAND_ROSSI_GAMMA_BASIS; 
+  // Options: QUDA_CPS_WILSON_DIRAC_ORDER, QUDA_DIRAC_ORDER
+  inv_param.dirac_order = QUDA_CPS_WILSON_DIRAC_ORDER; 
+  inv_param.tune = QUDA_TUNE_YES;
+  inv_param.use_init_guess = QUDA_USE_INIT_GUESS_YES;
+
+  // QUDA_VERBOSE, SILENT, DEBUG_VERBOSE, SUMMARIZE
+  inv_param.verbosity = QUDA_SUMMARIZE;
+
+  // QUDA_PACKED_CLOVER_ORDER: even-odd, packed
+  // QUDA_LEX_PACKED_CLOVER_ORDER: lexicographical order, packed 
+  if(WilClo == 1) inv_param.clover_order = QUDA_PACKED_CLOVER_ORDER;
+  //if(WilClo == 1) inv_param.clover_order = QUDA_LEX_PACKED_CLOVER_ORDER;
+}
+
+void set_quda_params_HMC(CgArg *cg_arg, int WilClo)
+{
+  ///////////////////////////////////////////////////////////////////
+  // For the reconstruct type we must be careful. We must use 
+  // QUDA_RECONSTRUCT_NO until we better understand the 
+  // unpacking algorithm.
+  ///////////////////////////////////////////////////////////////////
+
+  param = newQudaGaugeParam();
+
+  // set the CUDA precisions
+  param.reconstruct = QUDA_RECONSTRUCT_NO;
+  param.cuda_prec = QUDA_DOUBLE_PRECISION;
+
+  // set the CUDA sloppy precisions  
+  param.reconstruct_sloppy = QUDA_RECONSTRUCT_NO;
+  param.cuda_prec_sloppy = QUDA_DOUBLE_PRECISION;
+
+  // set the CUDA precondition precisions
+  param.cuda_prec_precondition = QUDA_DOUBLE_PRECISION;
+  param.reconstruct_precondition = QUDA_RECONSTRUCT_NO;
+  param.cpu_prec = QUDA_DOUBLE_PRECISION; 
+  
+  param.X[0] = GJP.XnodeSites();
+  param.X[1] = GJP.YnodeSites();
+  param.X[2] = GJP.ZnodeSites();
+  param.X[3] = GJP.TnodeSites();
+
+  param.anisotropy = GJP.XiBare();
+  param.cuda_prec_precondition = QUDA_DOUBLE_PRECISION;
+  param.gauge_order = QUDA_CPS_WILSON_GAUGE_ORDER;
+  param.gauge_fix = QUDA_GAUGE_FIXED_NO;
+  param.type = QUDA_WILSON_LINKS;  
+  param.t_boundary = QUDA_PERIODIC_T;  // or QUDA_ANTI_PERIODIC_T
+  param.ga_pad = 0;
+
+  //////////////////////////////////////////////////////////
+  //               QUDA MATRIX INVERSION                  //
+  //////////////////////////////////////////////////////////
+
+  inv_param = newQudaInvertParam();
+
+  if(WilClo == 0) inv_param.dslash_type = QUDA_WILSON_DSLASH;
+  if(WilClo == 1) inv_param.dslash_type = QUDA_CLOVER_WILSON_DSLASH;
+
+  //Fix QUDA inverter to Conjugate Gradient for now.
+  inv_param.inv_type = QUDA_CG_INVERTER;
+  printf("QUDA CG \n");
+
+  //Use HALF_PREC for sloppy
+  inv_param.cuda_prec_sloppy = QUDA_DOUBLE_PRECISION;
+  if(WilClo == 1) inv_param.clover_cuda_prec_sloppy = QUDA_DOUBLE_PRECISION;
+
+  //Use DOUBLE for everything else
+  inv_param.cuda_prec = QUDA_DOUBLE_PRECISION;
+  inv_param.cuda_prec_precondition = QUDA_DOUBLE_PRECISION;
+  inv_param.cpu_prec = QUDA_DOUBLE_PRECISION;
+
+  if(WilClo == 1) {
+    inv_param.clover_cuda_prec = QUDA_DOUBLE_PRECISION;
+    inv_param.clover_cuda_prec_precondition = QUDA_DOUBLE_PRECISION;
+    inv_param.clover_cpu_prec = QUDA_DOUBLE_PRECISION;
+    inv_param.clover_coeff = GJP.CloverCoeff();
+  }
+
+  inv_param.twist_flavor = QUDA_TWIST_NO;
+  inv_param.maxiter = cg_arg->max_num_iter; 
+  inv_param.reliable_delta = 1e-3;
   inv_param.tol = cg_arg->stop_rsd;
   inv_param.Ls = 0;
   inv_param.cl_pad = 0;
@@ -285,25 +439,31 @@ void set_quda_params(CgArg *cg_arg, int WilClo)
   inv_param.dagger = QUDA_DAG_NO;
 
   if(WilClo == 0) {
-    inv_param.solution_type = QUDA_MAT_SOLUTION;
+    inv_param.solution_type = QUDA_MATPCDAG_MATPC_SOLUTION;
     inv_param.solve_type = QUDA_NORMOP_PC_SOLVE; 
+    inv_param.matpc_type = QUDA_MATPC_ODD_ODD;
+  }
+
+  //Not working yet!!
+  if(WilClo == 1) {
+    inv_param.solution_type = QUDA_MATPCDAG_MATPC_SOLUTION;
+    inv_param.solve_type = QUDA_NORMOP_PC_SOLVE;
     inv_param.matpc_type = QUDA_MATPC_EVEN_EVEN;
   }
   
-  if(WilClo == 1) {
-    inv_param.solution_type = QUDA_MAT_SOLUTION;
-    inv_param.solve_type = QUDA_DIRECT_PC_SOLVE; 
-    inv_param.matpc_type = QUDA_MATPC_EVEN_EVEN_ASYMMETRIC;
-  }
-
   inv_param.preserve_source = QUDA_PRESERVE_SOURCE_YES;
   inv_param.gamma_basis = QUDA_DEGRAND_ROSSI_GAMMA_BASIS; 
   inv_param.dirac_order = QUDA_CPS_WILSON_DIRAC_ORDER; 
-  inv_param.tune = QUDA_TUNE_NO;
+  inv_param.tune = QUDA_TUNE_YES;
   inv_param.use_init_guess = QUDA_USE_INIT_GUESS_YES;
-  // QUDA_VERBOSE, QUDA_SILENT, QUDA_DEBUG_VERBOSE, SUMMARIZE
-  inv_param.verbosity = QUDA_SUMMARIZE; 
-  inv_param.clover_order = QUDA_PACKED_CLOVER_ORDER;
+  
+  // QUDA_VERBOSE, SILENT, DEBUG_VERBOSE, SUMMARIZE
+  inv_param.verbosity = QUDA_SUMMARIZE;
+  
+  // QUDA_PACKED_CLOVER_ORDER: even-odd, packed
+  // QUDA_LEX_PACKED_CLOVER_ORDER: lexicographical order, packed 
+  if(WilClo == 1) inv_param.clover_order = QUDA_PACKED_CLOVER_ORDER;
 }
+
 #endif
 //End QUDA_CPS

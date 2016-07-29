@@ -182,8 +182,21 @@ int Fwilson::FmatEvlInv(Vector *f_out, Vector *f_in,
   struct timeval t_start, t_stop;
   gettimeofday(&t_start,NULL);
   
+  //Begin QUDA_CPS
+#ifdef USEQUDA
+
+  int WilClo = 0;
+  Float *QUDA_true_res = (Float*)smalloc(1*sizeof(Float));
+  set_quda_params_HMC(cg_arg,WilClo);
+  iter = inversion_wilson_HMC(*this, f_in, f_out, QUDA_true_res);
+  *true_res = *QUDA_true_res;
+  sfree(QUDA_true_res);
+
+#else  
   iter = wilson.InvCg(&(cg_arg->true_rsd));
   if (true_res) *true_res = cg_arg ->true_rsd;
+#endif
+  //End QUDA_CPS
 
   gettimeofday(&t_stop,NULL);
   timersub(&t_stop,&t_start,&t_start);
@@ -286,19 +299,27 @@ int Fwilson::FmatInv(Vector *f_out, Vector *f_in,
   VRB.Func(cname,fname);
 
   DiracOpWilson wilson(*this, f_out, f_in, cg_arg, cnv_frm);
-
+  
   //Begin QUDA_CPS
 #ifdef USEQUDA
 
+  //Set QUDA parameters for WILSON fermions.  
   int WilClo = 0;
-  set_quda_params(cg_arg,WilClo);  
-  inversion_wilson(*this, f_in, f_out);
-  
-  iter = 1;
+  set_quda_params(cg_arg,WilClo);
+
+  //Invoke QUDA inverter, collect QUDA inversion data 
+  //(iterations, true res)
+  Float *QUDA_true_res = (Float*)smalloc(1*sizeof(Float));
+  iter = inversion_wilson(*this, f_in, f_out, QUDA_true_res);
+  *true_res = *QUDA_true_res;
+
+  //Free QUDA residual.
+  sfree(QUDA_true_res);
 #else  
   iter = wilson.MatInv(true_res, prs_f_in);
 #endif
   //End QUDA_CPS
+
   // Return the number of iterations
   return iter;
 }

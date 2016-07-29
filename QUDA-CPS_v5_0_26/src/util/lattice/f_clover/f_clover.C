@@ -181,10 +181,38 @@ int Fclover::FmatEvlInv(Vector *f_out, Vector *f_in,
 
   DiracOpClover clover(*this, f_out, f_in, cg_arg, cnv_frm);
   
-//  iter = clover.InvCg(&(cg_arg->true_rsd));
+  //Begin QUDA_CPS
+#ifdef USEQUDA
+
+  //Create and invert clover matrices.
+  ChkbType chkb = CHKB_EVEN;
+  int num_bytes = sizeof(double)*CLOVER_MAT_SIZE*GJP.VolNodeSites();
+  double *h_quda_clover_inv = (double*)smalloc(num_bytes);
+  double *h_quda_clover = (double*)smalloc(num_bytes);
+  fillCloverAll(*this, h_quda_clover, h_quda_clover_inv,chkb,
+		cg_arg, cnv_frm, clover);
+  
+  //Set QUDA parameters for CLOVER fermions.
+  int WilClo = 1;
+  set_quda_params_HMC(cg_arg,WilClo);
+
+  //Invoke QUDA inverter, collect QUDA inversion data 
+  //(iterations, true res)
+  Float *QUDA_true_res = (Float*)smalloc(1*sizeof(Float));
+  iter = inversion_clover_HMC(*this, h_quda_clover, h_quda_clover_inv,
+			      f_in, f_out, QUDA_true_res);  
+  *true_res = *QUDA_true_res;
+
+  //Free clover matrices and QUDA residual.
+  sfree(QUDA_true_res);
+  sfree(h_quda_clover_inv);
+  sfree(h_quda_clover);
+#else  
+  //  iter = clover.InvCg(&(cg_arg->true_rsd));
   iter = clover.MatEvlInv(&(cg_arg->true_rsd));
   if (true_res) *true_res = cg_arg ->true_rsd;
-
+#endif
+  //End QUDA_CPS
 
   // Return the number of CG iterations
   return iter;
@@ -259,22 +287,30 @@ int Fclover::FmatInv(Vector *f_out, Vector *f_in,
   
   //Begin QUDA_CPS
 #ifdef USEQUDA
+
+  //Create and invert clover matrices.
   ChkbType chkb = CHKB_EVEN;
   int num_bytes = sizeof(double)*CLOVER_MAT_SIZE*GJP.VolNodeSites();
   double *h_quda_clover_inv = (double*)smalloc(num_bytes);
   double *h_quda_clover = (double*)smalloc(num_bytes);
-
-  fillClover(*this, h_quda_clover, chkb, clover);
-  //fillCloverInv(*this, h_quda_clover_inv, chkb, clover);
-
-  int WilClo = 1;
-  set_quda_params(cg_arg,WilClo);  
-  inversion_clover(*this, h_quda_clover, h_quda_clover_inv, 
-		   f_in, f_out);
+  fillCloverAll(*this, h_quda_clover, h_quda_clover_inv,chkb,
+		cg_arg, cnv_frm, clover);
   
+  //Set QUDA parameters for CLOVER fermions.
+  int WilClo = 1;
+  set_quda_params(cg_arg,WilClo);
+
+  //Invoke QUDA inverter, collect QUDA inversion data 
+  //(iterations, true res)
+  Float *QUDA_true_res = (Float*)smalloc(1*sizeof(Float));
+  iter = inversion_clover(*this, h_quda_clover, h_quda_clover_inv, 
+			  f_in, f_out, QUDA_true_res);
+  *true_res = *QUDA_true_res;
+  
+  //Free clover matrices and QUDA residual.
   sfree(h_quda_clover_inv);
   sfree(h_quda_clover);
-  iter = 1;
+  sfree(QUDA_true_res);
 #else  
   iter = clover.MatInv(true_res, prs_f_in);
 #endif
