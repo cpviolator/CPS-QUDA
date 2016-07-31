@@ -1,12 +1,13 @@
 Welcome to the QUDA enabled Columbia Physics System!
 
-	GPU SUPPORT
+	GPU SUPPORT Mx=y solve
 
-This CPS library has been modified to offer limited GPU support. Currently 
-supported fermion inverters are listed below:
+This CPS library has been modified to offer limited GPU support for 
+fermion inverters. Currently supported fermions are:
 
 	  1. Clover Fermions
 	  2. Wilson Fermions
+	  3. Twisted Mass (Wilson)
 
 All files and functions needed to enable QUDA support are contained in the
 directory `src/util/quda_interface` and the header file 
@@ -20,8 +21,24 @@ One may utilise the `CG` or `BICGSTAB` QUDA inverter type simply by setting the
 CPS inverter type as required. A new CPS enumerator `QUDA_GCR_INVERTER` 
 has been included to utilise the QUDA `GCR` inverter.
 
-Examples on how to use the GPU enabled library are given in this release
-for both single hadron and two hadron channels. The modifications 
+	GPU SUPPORT M^{\dagger}Mx=y solve
+
+We have implemented partial GPU support in the HMC routines. The fermion
+matrix inversion is done on teh device, but the gauge force and 
+pseudo-heatbath routines are presently still done on the host.
+Currently supported fermions are:
+
+	  1. Wilson Fermions
+	  2. Twisted Mass (Wilson)
+
+N.B. When using the twisted mass fermion action, the epsilon parameter
+must be set as a Global Job Parameter in the DoArg structure. Simply
+set
+
+do_arg.epsilonTm = Your Value;
+
+at compile time. Examples on how to use the GPU enabled library are given in 
+this release for both single hadron and two hadron channels. The modifications 
 required to allow existing code to use this library should be minimal.
 For details, please refer to the differences between GPU enabled and CPU 
 only files, highlighted in our production code package. Instructions for 

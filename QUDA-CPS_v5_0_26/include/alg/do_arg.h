@@ -80,6 +80,7 @@ public:
 	Float xi_v;
 	Float xi_v_xi;
 	Float clover_coeff;
+	Float epsilonTm;
 	Float clover_coeff_xi;
 	Float xi_gfix;
 	int gfix_chkb;

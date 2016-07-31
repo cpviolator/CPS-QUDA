@@ -94,6 +94,9 @@ class DoArg {
   Float xi_v;               /*!< The bare speed of light*/
   Float xi_v_xi;            /*!< The bare speed of light in the direction of the anisotropy.*/
   Float clover_coeff;       /*!< The coefficient of the clover term in the fermion action.*/
+  /*!< Begin QUDA_CPS */
+  Float epsilonTm;            /*!< The twisted mass epsilon parameter.*/
+  /*!< End QUDA_CPS */
   Float clover_coeff_xi;    /*!< The coefficient of the clover term for plaquettes with links along the anisotropic direction.*/
   /* Added for Landau gauge fixing for anisotropic lattices*/
   Float xi_gfix;            /*!< Coefficient for Landau gauge fixing.*/

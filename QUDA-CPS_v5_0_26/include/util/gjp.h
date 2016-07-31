@@ -637,6 +637,16 @@ public:
     This 1 for tree level improvement.
     \return The clover coefficient.
   */
+
+  //Begin QUDA_CPS
+  Float epsilonTm()   const     {return doarg_int.epsilonTm;}
+  //!< Gets the epsilon parameter for twisted fermions.
+  /*!<
+    The epsilon parameter for twisted mass fermions.
+    The initalsed value is Zero unless changed by doarg_int.
+    \return the epsilon parameter.
+  */
+  //End QUDA_CPS
  
   Float CloverCoeffXi() const     {return doarg_int.clover_coeff_xi;}
   //!< Gets the anisotropic clover coefficient.

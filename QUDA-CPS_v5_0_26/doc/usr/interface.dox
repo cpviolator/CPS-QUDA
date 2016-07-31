@@ -135,6 +135,11 @@ These must be assigned a value.
 - \ref cloveraction parameter
  - DoArg::clover_coeff
 
+Begin QUDA_CPS
+- \ref twisted mass parameter
+ - DoArg::epsilonTm
+End QUDA_CPS
+
  Parameters of an action that is not used in an application do not need 
 to be assigned a value - they are either ignored or take on reasonable 
 defaults.

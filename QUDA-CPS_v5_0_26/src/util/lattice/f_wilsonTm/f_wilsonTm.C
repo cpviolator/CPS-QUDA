@@ -33,7 +33,19 @@ CPS_END_NAMESPACE
 #include <comms/glb.h>
 #include <util/lattice/fforce_wilson_type.h>
 
+//Begin QUDA_CPS
+#ifdef USEQUDA
+#include <iostream>
+using namespace std;
+#include <util/quda_interface.h>
+#include <quda.h>
+
 CPS_START_NAMESPACE
+
+#else
+CPS_START_NAMESPACE
+#endif
+//End QUDA_CPS
 
 //------------------------------------------------------------------
 // This constructor does nothing.
@@ -78,14 +90,29 @@ int FwilsonTm::FmatEvlInv(Vector *f_out, Vector *f_in,
                           Float *true_res,
                           CnvFrmType cnv_frm)
 {
-    char *fname = "FmatEvlInv(CgArg*,V*,V*,F*,CnvFrmType)";
-    VRB.Func(cname,fname);
-
-    DiracOpWilsonTm wilson(*this, f_out, f_in, cg_arg, cnv_frm);
-    int iter = wilson.InvCg(&(cg_arg->true_rsd));
-    if (true_res) *true_res = cg_arg ->true_rsd;
-
-    return iter;
+  int iter = 0;
+  char *fname = "FmatEvlInv(CgArg*,V*,V*,F*,CnvFrmType)";
+  VRB.Func(cname,fname);
+  
+  DiracOpWilsonTm wilson(*this, f_out, f_in, cg_arg, cnv_frm);
+  
+  //Begin QUDA_CPS
+#ifdef USEQUDA
+  
+  int WilClo = 0;
+  Float *QUDA_true_res = (Float*)smalloc(1*sizeof(Float));
+  set_quda_params_HMC(cg_arg,WilClo);
+  iter = inversion_wilson_HMC(*this, f_in, f_out, QUDA_true_res);
+  *true_res = *QUDA_true_res;
+  sfree(QUDA_true_res);
+  
+#else  
+  iter = wilson.InvCg(&(cg_arg->true_rsd));
+  if (true_res) *true_res = cg_arg ->true_rsd;
+#endif
+  //End QUDA_CPS
+  
+  return iter;
 }
 
 //------------------------------------------------------------------
@@ -105,6 +132,14 @@ int FwilsonTm::FmatEvlInv(Vector *f_out, Vector *f_in,
 // int FeigSolv not changed for twisted-mass Wilson fermions
 //------------------------------------------------------------------
 
+//Begin QUDA_CPS
+#ifdef USEQUDA
+CPS_END_NAMESPACE
+#undef DagType
+CPS_START_NAMESPACE
+#endif
+//End QUDA_CPS
+
 //------------------------------------------------------------------
 // SetPhi(Vector *phi, Vector *frm1, Vector *frm2, Float mass,
 //        Float epsilon, DagType dag):
@@ -115,13 +150,14 @@ int FwilsonTm::FmatEvlInv(Vector *f_out, Vector *f_in,
 //------------------------------------------------------------------
 Float FwilsonTm::SetPhi(Vector *phi, Vector *frm1, Vector *frm2,
 		      Float mass, Float epsilon, DagType dag){
-  char *fname = "SetPhi(V*,V*,V*,F,F)";
+  char *fname = "SetPhi(V*,V*,V*,F,F,DagType)";
   VRB.Func(cname,fname);
-
+  
   CgArg cg_arg;
   cg_arg.mass = mass;
-  cg_arg.epsilon = epsilon;
-
+  //Begin QUDA_CPS
+  cg_arg.epsilon = GJP.epsilonTm();
+  //ENd QUDA_CPS
   if (phi == 0)
     ERR.Pointer(cname,fname,"phi") ;
 
@@ -141,14 +177,19 @@ Float FwilsonTm::SetPhi(Vector *phi, Vector *frm1, Vector *frm2,
 // should never be called by wilsonTm fermions
 //------------------------------------------------------------------
 Float FwilsonTm::SetPhi(Vector *phi, Vector *frm1, Vector *frm2,
-		      Float mass, DagType dag){
-  char *fname = "SetPhi(V*,V*,V*,F,DagType)";
-  VRB.Func(cname,fname);
-
-  ERR.General(cname,fname,"f_wilsonTm: SetPhi(V*,V*,V*,F,DagType) not implemented here\n");
-
-  return Float(0.0);
+			Float mass, DagType dag) {
+  //Begin QUDA_CPS
+  Float epsilon = GJP.epsilonTm();
+  return FwilsonTm::SetPhi(phi,frm1,frm2,mass,epsilon,dag);
+  /*
+    char *fname = "SetPhi(V*,V*,V*,F,DagType)";
+    VRB.Func(cname,fname);
+    ERR.General(cname,fname,"f_wilsonTm: SetPhi(V*,V*,V*,F,DagType) not implemented here\n");
+    return Float(0.0);
+  */
+  //End QUDA_CPS
 }
+
 
 //------------------------------------------------------------------
 // ForceArg RHMC_EvolveMomFforce not changed for twisted-mass Wilson fermions
@@ -165,8 +206,9 @@ Float FwilsonTm::BhamiltonNode(Vector *boson, Float mass, Float epsilon){
   
   CgArg cg_arg;
   cg_arg.mass = mass;
-  cg_arg.epsilon = epsilon;
-
+  //Begin QUDA_CPS
+  cg_arg.epsilon = GJP.epsilonTm();
+  //End QUDA_CPS
   if (boson == 0)
     ERR.Pointer(cname,fname,"boson");
 
@@ -200,12 +242,17 @@ Float FwilsonTm::BhamiltonNode(Vector *boson, Float mass, Float epsilon){
 // should never be called by wilsonTm fermions
 //------------------------------------------------------------------
 Float FwilsonTm::BhamiltonNode(Vector *boson, Float mass){
-  char *fname = "BhamiltonNode(V*,F)";
-  VRB.Func(cname,fname);
-  
-  ERR.General(cname,fname,"f_wilsonTm: BhamiltonNode(V*,F) not implemented here\n");
+  //Begin QUDA_CPS
+  Float epsilon = GJP.epsilonTm();
+  return FwilsonTm::BhamiltonNode(boson,mass,epsilon);
 
-  return Float(0.0);
+  /*
+    char *fname = "BhamiltonNode(V*,F)";
+    VRB.Func(cname,fname);  
+    ERR.General(cname,fname,"f_wilsonTm: BhamiltonNode(V*,F) not implemented here\n");
+    return Float(0.0);
+  */
+  //End QUDA_CPS
 }
 
 //------------------------------------------------------------------
@@ -229,14 +276,15 @@ ForceArg FwilsonTm::EvolveMomFforce(Matrix *mom, Vector *chi,
 
     {
         CgArg cg_arg ;
-        cg_arg.mass = mass ;
-        cg_arg.epsilon = epsilon;
-      
+        cg_arg.mass = mass;
+	//Begin QUDA_CPS
+        cg_arg.epsilon = GJP.epsilonTm();
+	//End QUDA_CPS
         DiracOpWilsonTm wilson(*this, v1, v2, &cg_arg, CNV_FRM_YES) ;
         // chi <- (M_f^\dag M_f)^{-1} M_f^\dag (RGV)
         wilson.CalcHmdForceVecs(chi);
     }
-
+    
     this->BondCond();
     FforceWilsonType cal_force(mom, this->GaugeField(),
                                (Float *)v2, (Float *)v1, 1, 2.0 * dt);
@@ -253,16 +301,19 @@ ForceArg FwilsonTm::EvolveMomFforce(Matrix *mom, Vector *chi,
 // should never be called by wilsonTm fermions
 //------------------------------------------------------------------
 ForceArg FwilsonTm::EvolveMomFforce(Matrix *mom, Vector *chi, 
-			      Float mass, Float dt)
-{
-  char *fname = "EvolveMomFforce(M*,V*,F,F)";
-  VRB.Func(cname,fname);
-
-  ERR.General(cname,fname,"f_wilsonTm: EvolveMomFforce(M*,V*,F,F) not implemented here\n");
-
-  return ForceArg(0.0,0.0,0.0);
+			      Float mass, Float dt){
+  //Begin QUDA_CPS
+  Float epsilon = GJP.epsilonTm();
+  return FwilsonTm::EvolveMomFforce(mom,chi,mass,epsilon,dt);
+  
+  /*
+    char *fname = "EvolveMomFforce(M*,V*,F,F)";
+    VRB.Func(cname,fname);
+    ERR.General(cname,fname,"f_wilsonTm: EvolveMomFforce(M*,V*,F,F) not implemented here\n");
+    return ForceArg(0.0,0.0,0.0);
+  */
+  //End QUDA_CPS
 }
-
 
 //------------------------------------------------------------------
 // EvolveMomFforce(Matrix *mom, Vector *frm, Vector *frm,
@@ -276,39 +327,40 @@ ForceArg FwilsonTm::EvolveMomFforce(Matrix *mom, Vector *chi,
 ForceArg FwilsonTm::EvolveMomFforce(Matrix *mom, Vector *chi, Vector *eta,
                                     Float mass, Float epsilon, Float dt)
 {
-    const char *fname = "EvolveMomFforce(M*,V*,V*,F,F,F)";
-    if (mom == 0)            { ERR.Pointer(cname,fname,"mom") ; }
-    if (eta == 0)            { ERR.Pointer(cname,fname,"eta") ; }
+  const char *fname = "EvolveMomFforce(M*,V*,V*,F,F,F)";
+  if (mom == 0)            { ERR.Pointer(cname,fname,"mom") ; }
+  if (eta == 0)            { ERR.Pointer(cname,fname,"eta") ; }
 
-    const int f_size = FsiteSize() * GJP.VolNodeSites();
-    Vector *v1 = (Vector *)smalloc(cname, fname, "v1", f_size*sizeof(Float)) ;
-    Vector *v2 = (Vector *)smalloc(cname, fname, "v2", f_size*sizeof(Float)) ;
-
-    {
-        CgArg cg_arg ;
-        cg_arg.mass = mass ;
-        cg_arg.epsilon = epsilon;
-
-        DiracOpWilsonTm wilson(*this, v1, v2, &cg_arg, CNV_FRM_YES) ;
-
-        //~~
-        //~~ fermion version:  	wilson.CalcHmdForceVecs(chi)
-        //~~ boson version:  	wilson.CalcBsnForceVecs(chi, eta)
-        //~~
-        // chi <- (M_f^\dag M_f)^{-1} M_f^\dag (RGV)
-        // phi <- M_b (M_b^\dag M_b)^{-1} M_f^\dag (RGV)
-        wilson.CalcBsnForceVecs(chi, eta) ;
-    }
-
-    this->BondCond();
-    FforceWilsonType cal_force(mom, this->GaugeField(),
-                               (Float *)v2, (Float *)v1, 1, -2.0 * dt);
-    ForceArg ret = cal_force.run();
-    this->BondCond();
-
-    sfree(cname, fname, "v1", v1);
-    sfree(cname, fname, "v2", v2);
-    return ret;
+  const int f_size = FsiteSize() * GJP.VolNodeSites();
+  Vector *v1 = (Vector *)smalloc(cname, fname, "v1", f_size*sizeof(Float)) ;
+  Vector *v2 = (Vector *)smalloc(cname, fname, "v2", f_size*sizeof(Float)) ;
+  
+  {
+    CgArg cg_arg ;
+    cg_arg.mass = mass;
+    //Begin QUDA_CPS
+    cg_arg.epsilon = GJP.epsilonTm();
+    //End QUDA_CPS
+    DiracOpWilsonTm wilson(*this, v1, v2, &cg_arg, CNV_FRM_YES) ;
+    
+    //~~
+    //~~ fermion version:  	wilson.CalcHmdForceVecs(chi)
+    //~~ boson version:  	wilson.CalcBsnForceVecs(chi, eta)
+    //~~
+    // chi <- (M_f^\dag M_f)^{-1} M_f^\dag (RGV)
+    // phi <- M_b (M_b^\dag M_b)^{-1} M_f^\dag (RGV)
+    wilson.CalcBsnForceVecs(chi, eta) ;
+  }
+  
+  this->BondCond();
+  FforceWilsonType cal_force(mom, this->GaugeField(),
+			     (Float *)v2, (Float *)v1, 1, -2.0 * dt);
+  ForceArg ret = cal_force.run();
+  this->BondCond();
+  
+  sfree(cname, fname, "v1", v1);
+  sfree(cname, fname, "v2", v2);
+  return ret;
 }
 
 //------------------------------------------------------------------
@@ -317,11 +369,16 @@ ForceArg FwilsonTm::EvolveMomFforce(Matrix *mom, Vector *chi, Vector *eta,
 // should never be called by wilsonTm fermions
 //------------------------------------------------------------------
 ForceArg FwilsonTm::EvolveMomFforce(Matrix *mom, Vector *phi, Vector *eta,
-		      Float mass, Float dt) {
-  char *fname = "EvolveMomFforce(M*,V*,V*,F,F)";
-  ERR.General(cname,fname,"f_wilsonTm: EvolveMomFForce(M*,V*,V*,F,F) not implemented here\n");
-
-  return ForceArg(0.0,0.0,0.0);
+				    Float mass, Float dt){
+  //Begin QUDA_CPS
+  Float epsilon = GJP.epsilonTm();
+  return FwilsonTm::EvolveMomFforce(mom,phi,eta,mass,epsilon,dt);
+  
+  /*
+    char *fname = "EvolveMomFforce(M*,V*,V*,F,F)";
+    ERR.General(cname,fname,"f_wilsonTm: EvolveMomFForce(M*,V*,V*,F,F) not implemented here\n");
+    return ForceArg(0.0,0.0,0.0);    
+  */
+  //End QUDA_CPS
 }
-
 CPS_END_NAMESPACE

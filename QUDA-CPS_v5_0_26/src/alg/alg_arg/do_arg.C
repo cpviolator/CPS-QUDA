@@ -160,6 +160,8 @@ vml_DoArg (VML *vmls, char *name,DoArg *objp)
 		 return FALSE;
 	 if (!vml_Float (vmls, "clover_coeff", &objp->clover_coeff))
 		 return FALSE;
+	 if (!vml_Float (vmls, "epsilonTm", &objp->epsilonTm))
+		 return FALSE;
 	 if (!vml_Float (vmls, "clover_coeff_xi", &objp->clover_coeff_xi))
 		 return FALSE;
 	 if (!vml_Float (vmls, "xi_gfix", &objp->xi_gfix))

@@ -27,6 +27,9 @@ DoArg::DoArg () {
   xi_v=1.0;
   xi_v_xi=1.0;
   clover_coeff=0.0;
+  //Begin QUDA_CPS
+  epsilonTm=0.0;
+  //End QUDA_CPS
   clover_coeff_xi=0.0;
   c_1=0.0;
   u0=1.0;
