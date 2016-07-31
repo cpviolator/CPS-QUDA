@@ -9,14 +9,6 @@ fermion inverters. Currently supported fermions are:
 	  2. Wilson Fermions
 	  3. Twisted Mass (Wilson)
 
-All files and functions needed to enable QUDA support are contained in the
-directory `src/util/quda_interface` and the header file 
-`include/util/quda_interface.h`. The only other files which has been
-modified with repsect to QUDA support is
-`src/util/lattice/f_clover/f_clover.C` and 
-`src/util/lattice/f_clover/f_clover.C`. The code changes to CPS in these 
-files are delineated by the compiler flag `#ifdef USEQUDA`.
-
 One may utilise the `CG` or `BICGSTAB` QUDA inverter type simply by setting the
 CPS inverter type as required. A new CPS enumerator `QUDA_GCR_INVERTER` 
 has been included to utilise the QUDA `GCR` inverter.
@@ -24,7 +16,7 @@ has been included to utilise the QUDA `GCR` inverter.
 	GPU SUPPORT M^{\dagger}Mx=y solve
 
 We have implemented partial GPU support in the HMC routines. The fermion
-matrix inversion is done on teh device, but the gauge force and 
+matrix inversion is done on the device, but the gauge force and 
 pseudo-heatbath routines are presently still done on the host.
 Currently supported fermions are:
 
@@ -37,13 +29,28 @@ set
 
 do_arg.epsilonTm = Your Value;
 
-at compile time. Examples on how to use the GPU enabled library are given in 
+at compile time.
+
+All extra files and functions needed to enable QUDA support are contained in the
+directory `src/util/quda_interface` and the header file 
+`include/util/quda_interface.h`. Please review the file 
+`src/util/quda_interface/quda_interface.cpp` to adjust the QUDA settings as you need.
+All modified files in CPS pertaining to GPU support are delineated by the compiler flag 
+
+`#ifdef USEQUDA`
+
+and all changes, including the extra features, are delineated by
+
+	Begin QUDA_CPS
+	      ... code changes ...
+	End QUDA_CPS
+
+Examples on how to use the GPU enabled library are given in 
 this release for both single hadron and two hadron channels. The modifications 
 required to allow existing code to use this library should be minimal.
 For details, please refer to the differences between GPU enabled and CPU 
 only files, highlighted in our production code package. Instructions for 
 configuring and making this package are given below.
-
 
 	CONFIGURING AND COMPILATION
 
